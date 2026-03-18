@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <title>EV Internal Pipeline</title>
     <style>
         /* --- STILE ENGEL & VÖLKERS --- */
         :root {
-            --ev-black: #111111;
-            --ev-white: #FFFFFF;
-            --ev-red: #CC0000;
-            --bg-light: #F9F9F9;
-            --border-color: #EEEEEE;
-            --text-dark: #333333;
-            --text-light: #888888;
+            --ev-black: #111111; --ev-white: #FFFFFF; --ev-red: #CC0000;
+            --bg-light: #F9F9F9; --border-color: #EEEEEE; --text-dark: #333333; --text-light: #888888;
         }
 
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--ev-white); margin: 0; padding: 0; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; }
@@ -31,28 +27,18 @@
         /* --- BOARD KANBAN --- */
         .board { display: flex; gap: 25px; width: 95%; max-width: 1400px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
         
-        .column { 
-            background-color: var(--bg-light); border-radius: 4px; width: 32%; min-width: 300px; padding: 20px; 
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; 
-            transition: background-color 0.2s;
-        }
+        .column { background-color: var(--bg-light); border-radius: 4px; width: 32%; min-width: 300px; padding: 20px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; transition: background-color 0.2s; }
         .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; }
-        
         .column.inprogress { border-top-color: var(--ev-red); }
         .column.completed { border-top-color: #333; }
         .column h2 { font-size: 16px; margin-top: 0; color: var(--ev-black); text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .task-count { font-size: 12px; background: #ddd; color: #555; padding: 2px 6px; border-radius: 10px; }
-        
         .task-list { min-height: 300px; }
 
-        /* --- TASK CARD & DRAG AND DROP --- */
-        .task-card {
-            background-color: var(--ev-white); padding: 15px; border-radius: 4px; margin-bottom: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: grab; border-left: 4px solid transparent; position: relative;
-        }
+        /* --- TASK CARD --- */
+        .task-card { background-color: var(--ev-white); padding: 15px; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: grab; border-left: 4px solid transparent; position: relative; }
         .task-card:active { cursor: grabbing; opacity: 0.6; transform: scale(0.98); }
         .task-card:hover { box-shadow: 0 5px 10px rgba(0,0,0,0.15); border-left-color: var(--ev-red); }
-        
         .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
@@ -61,22 +47,36 @@
         .priority-media { background-color: #FFB300; color: black; }
         .priority-bassa { background-color: #E0E0E0; color: #333; }
 
-        /* --- MODAL E PULSANTI --- */
+        /* --- MODAL E TABELLA INTERATTIVA --- */
         .add-macro-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
         .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
 
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
-        .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 85%; max-width: 900px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
+        .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 90%; max-width: 1000px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
         .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
         .close-btn:hover { color: var(--ev-black); }
         .modal-header h2 { margin: 0; color: var(--ev-black); font-size: 22px; }
         
         .subtask-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 11px; }
-        .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 10px; }
+        .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 12px; }
+        .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 8px; }
         
-        .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 8px 15px; border-radius: 2px; cursor: pointer; margin-top: 15px; }
+        /* Stile per gli input modificabili */
+        .edit-input { width: 95%; padding: 6px; border: 1px solid transparent; border-radius: 3px; font-family: inherit; font-size: 13px; background-color: transparent; transition: all 0.2s; }
+        .edit-input:hover { border-color: #ccc; background-color: #f5f5f5; }
+        .edit-input:focus { outline: none; border-color: var(--ev-red); background-color: #fff; box-shadow: 0 0 0 2px rgba(204,0,0,0.1); }
+        
+        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 12px; }
+        
+        .delete-btn { background-color: transparent; color: var(--text-light); border: none; cursor: pointer; font-size: 16px; font-weight: bold; padding: 5px 10px; }
+        .delete-btn:hover { color: var(--ev-red); }
+
+        .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
         .add-sub-btn:hover { background-color: var(--ev-red); }
+        
+        /* Pulsante elimina macro task */
+        .delete-macro-btn { background-color: var(--ev-white); color: var(--ev-red); border: 1px solid var(--ev-red); padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 15px; float: right; font-size: 12px;}
+        .delete-macro-btn:hover { background-color: var(--ev-red); color: var(--ev-white); }
     </style>
 </head>
 <body>
@@ -97,12 +97,10 @@
             <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
             <div class="task-list" id="list-backlog"></div>
         </div>
-
         <div class="column inprogress" id="col-inprogress" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'inprogress')">
             <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
             <div class="task-list" id="list-inprogress"></div>
         </div>
-
         <div class="column completed" id="col-completed" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'completed')">
             <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
             <div class="task-list" id="list-completed"></div>
@@ -116,32 +114,55 @@
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div class="modal-header">
                 <h2 id="modalTitle">Nome Progetto</h2>
+                <p style="color: #666; font-size: 12px;">Clicca sui testi nella tabella per modificarli. Il salvataggio è automatico.</p>
             </div>
-            <div style="max-height: 400px; overflow-y: auto;">
+            <div style="max-height: 50vh; overflow-y: auto;">
                 <table class="subtask-table">
-                    <thead><tr><th width="40%">Task</th><th width="20%">Status</th><th width="40%">Commento</th></tr></thead>
+                    <thead><tr><th width="35%">Sotto-Task</th><th width="15%">Status</th><th width="45%">Commento / Note</th><th width="5%"></th></tr></thead>
                     <tbody id="subtaskTableBody"></tbody>
                 </table>
             </div>
             <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
+            <button class="delete-macro-btn" id="deleteMacroBtn">Elimina intero Progetto</button>
         </div>
     </div>
 
     <script>
-        let projectsData = [
+        // Array di default (usato solo la primissima volta)
+        const defaultData = [
             { id: 1, name: "Tutor program", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Migliorare comunicazione finance", status: "In corso", comment: "" } ] },
             { id: 2, name: "File vendite e locazioni", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Vedere se si può automatizzare", status: "In corso", comment: "" } ] },
             { id: 3, name: "Newsletter nuovi incarichi", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
             { id: 4, name: "Archivio antiriciclaggio", status: "backlog", priority: "Alta", subtasks: [ { title: "Programmare incontro", status: "In corso", comment: "" } ] },
-            { id: 5, name: "DB HR", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
-            { id: 6, name: "Recruiting", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
-            { id: 7, name: "File proprietà Rent", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] }
+            { id: 5, name: "DB HR", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] }
         ];
 
+        let projectsData = [];
         const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
+        let currentEditingProjectId = null;
 
-        document.addEventListener('DOMContentLoaded', () => { renderBoard(); });
+        // --- GESTIONE MEMORIA (LOCAL STORAGE) ---
+        function loadData() {
+            const savedData = localStorage.getItem('ev_pipeline_data');
+            if (savedData) {
+                projectsData = JSON.parse(savedData);
+            } else {
+                projectsData = JSON.parse(JSON.stringify(defaultData)); // Clona array di default
+                saveData(); // Salva subito
+            }
+        }
 
+        function saveData() {
+            localStorage.setItem('ev_pipeline_data', JSON.stringify(projectsData));
+            renderBoard(); // Aggiorna la vista dopo aver salvato
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { 
+            loadData(); 
+            renderBoard(); 
+        });
+
+        // --- RENDER BOARD KANBAN ---
         function renderBoard() {
             const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
             Object.values(lists).forEach(list => list.innerHTML = '');
@@ -164,7 +185,7 @@
                     card.innerHTML = `
                         <div class="priority-badge ${priorityClass}">Priorità ${project.priority}</div>
                         <h3>${project.name}</h3>
-                        <p>(Doppio clic per i dettagli)</p>
+                        <p>${project.subtasks.length} sub-tasks (doppio clic per gestire)</p>
                     `;
                     lists[status].appendChild(card);
                 });
@@ -178,6 +199,7 @@
             document.getElementById('stat-completed').innerText = counts.completed;
         }
 
+        // --- FUNZIONI DRAG AND DROP ---
         function dragStart(event, id) { event.dataTransfer.setData("text/plain", id); }
         function allowDrop(event) { event.preventDefault(); }
         function dragEnter(event) { event.preventDefault(); event.currentTarget.classList.add('drag-over'); }
@@ -188,32 +210,103 @@
             event.currentTarget.classList.remove('drag-over');
             const id = parseInt(event.dataTransfer.getData("text/plain"));
             const project = projectsData.find(p => p.id === id);
-            if (project && project.status !== newStatus) { project.status = newStatus; renderBoard(); }
+            if (project && project.status !== newStatus) { 
+                project.status = newStatus; 
+                saveData(); // SALVA MODIFICA
+            }
         }
 
+        // --- AGGIUNTA PROGETTO ---
         function addNewMacroTask() {
             const name = prompt("Inserisci il nome del nuovo Progetto:");
             if (!name) return;
             let prioInput = prompt("Priorità (numero): \n1 = Alta \n2 = Media \n3 = Bassa", "2");
             let pLabel = prioInput === "1" ? "Alta" : (prioInput === "3" ? "Bassa" : "Media");
             projectsData.push({ id: Date.now(), name: name, status: "backlog", priority: pLabel, subtasks: [] });
-            renderBoard();
+            saveData(); // SALVA NUOVO PROGETTO
         }
 
+        // --- MODALE E GESTIONE SOTTO-TASK INTERATTIVI ---
         function openModal(projectId) {
+            currentEditingProjectId = projectId;
             const project = projectsData.find(p => p.id === projectId);
             document.getElementById('modalTitle').innerText = project.name;
-            const tbody = document.getElementById('subtaskTableBody');
-            tbody.innerHTML = '';
-            project.subtasks.forEach(sub => { tbody.innerHTML += `<tr><td>${sub.title}</td><td>${sub.status}</td><td>${sub.comment}</td></tr>`; });
+            
+            renderSubTasksTable(project);
+
+            // Pulsante Aggiungi
             document.getElementById('addSubTaskBtn').onclick = () => {
-                const title = prompt("Nuovo Sotto-task:");
-                if(title) { project.subtasks.push({title: title, status: 'In corso', comment: ''}); openModal(projectId); renderBoard(); }
+                project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" });
+                saveData();
+                renderSubTasksTable(project); // Aggiorna solo la modale
             };
+
+            // Pulsante Elimina Progetto
+            document.getElementById('deleteMacroBtn').onclick = () => {
+                if(confirm("Sei sicuro di voler eliminare interamente questo progetto e tutti i suoi sub-task?")) {
+                    projectsData = projectsData.filter(p => p.id !== projectId);
+                    saveData();
+                    closeModal();
+                }
+            };
+
             document.getElementById('taskModal').style.display = 'block';
         }
 
-        function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
+        function renderSubTasksTable(project) {
+            const tbody = document.getElementById('subtaskTableBody');
+            tbody.innerHTML = '';
+            
+            project.subtasks.forEach((sub, index) => { 
+                tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <input type="text" class="edit-input" value="${sub.title}" 
+                        onchange="updateSubTask(${project.id}, ${index}, 'title', this.value)">
+                    </td>
+                    <td>
+                        <select class="status-select" onchange="updateSubTask(${project.id}, ${index}, 'status', this.value)">
+                            <option value="Da Iniziare" ${sub.status === 'Da Iniziare' ? 'selected' : ''}>Da Iniziare</option>
+                            <option value="In corso" ${sub.status === 'In corso' ? 'selected' : ''}>In corso</option>
+                            <option value="Completato" ${sub.status === 'Completato' ? 'selected' : ''}>Completato</option>
+                            <option value="Bloccato" ${sub.status === 'Bloccato' ? 'selected' : ''}>Bloccato</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="edit-input" value="${sub.comment}" placeholder="Aggiungi note..."
+                        onchange="updateSubTask(${project.id}, ${index}, 'comment', this.value)">
+                    </td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteSubTask(${project.id}, ${index})" title="Elimina Sub-Task">✕</button>
+                    </td>
+                </tr>`; 
+            });
+        }
+
+        function updateSubTask(projectId, subIndex, field, newValue) {
+            const project = projectsData.find(p => p.id === projectId);
+            if (project && project.subtasks[subIndex]) {
+                project.subtasks[subIndex][field] = newValue;
+                saveData(); // SALVA AUTOMATICAMENTE
+            }
+        }
+
+        function deleteSubTask(projectId, subIndex) {
+            if(confirm("Eliminare questo sotto-task?")) {
+                const project = projectsData.find(p => p.id === projectId);
+                if (project) {
+                    project.subtasks.splice(subIndex, 1);
+                    saveData();
+                    renderSubTasksTable(project); // Ricarica tabella
+                }
+            }
+        }
+
+        function closeModal() { 
+            document.getElementById('taskModal').style.display = 'none'; 
+            currentEditingProjectId = null;
+        }
+        
         window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
     </script>
 </body>
