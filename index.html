@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline Progetti</title>
+    <style>
+        /* Grafica e Stili Base */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f5f7;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 { text-align: center; color: #172b4d; }
+        
+        /* Board Principale */
+        .board {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 30px;
+        }
+        .column {
+            background-color: #ebecf0;
+            border-radius: 8px;
+            width: 300px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .column h2 {
+            font-size: 16px;
+            margin-top: 0;
+            color: #172b4d;
+            border-bottom: 2px solid #dfe1e6;
+            padding-bottom: 10px;
+        }
+        .task-list { min-height: 50px; }
+        
+        /* Singolo Task */
+        .task {
+            background-color: white;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .task:hover { transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+        
+        .add-btn {
+            background: none;
+            border: none;
+            color: #5e6c84;
+            cursor: pointer;
+            padding: 8px;
+            width: 100%;
+            text-align: left;
+            border-radius: 4px;
+        }
+        .add-btn:hover { background-color: #dfe1e6; }
+
+        /* Finestra Modale (Mini Pipeline) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content {
+            background-color: #f4f5f7;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover { color: black; }
+        
+        /* Mini Board interna */
+        .mini-board { display: flex; gap: 15px; margin-top: 20px; }
+        .mini-column {
+            background-color: #dfe1e6;
+            border-radius: 6px;
+            flex: 1;
+            padding: 10px;
+        }
+        .mini-column h3 { font-size: 14px; margin-top: 0; color: #172b4d; }
+    </style>
+</head>
+<body>
+
+    <h1>Gestione Progetti</h1>
+
+    <div class="board">
+        <div class="column" id="backlog">
+            <h2>Backlog</h2>
+            <div class="task-list" id="list-backlog">
+                <div class="task" onclick="openModal('Nuovo Sito Web')">Nuovo Sito Web</div>
+            </div>
+            <button class="add-btn" onclick="addTask('list-backlog')">+ Aggiungi Task</button>
+        </div>
+
+        <div class="column" id="inprogress">
+            <h2>In Progress</h2>
+            <div class="task-list" id="list-inprogress">
+                <div class="task" onclick="openModal('Campagna Marketing')">Campagna Marketing</div>
+            </div>
+            <button class="add-btn" onclick="addTask('list-inprogress')">+ Aggiungi Task</button>
+        </div>
+
+        <div class="column" id="completed">
+            <h2>Completed</h2>
+            <div class="task-list" id="list-completed">
+                <div class="task" onclick="openModal('Aggiornamento CRM')">Aggiornamento CRM</div>
+            </div>
+            <button class="add-btn" onclick="addTask('list-completed')">+ Aggiungi Task</button>
+        </div>
+    </div>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Nome del Progetto</h2>
+            <p>Gestisci qui i micro-task di questa specifica attività.</p>
+            
+            <div class="mini-board">
+                <div class="mini-column">
+                    <h3>Da fare</h3>
+                    <div class="task-list" id="mini-todo"></div>
+                    <button class="add-btn" onclick="addTask('mini-todo')">+ Aggiungi micro-task</button>
+                </div>
+                <div class="mini-column">
+                    <h3>In lavorazione</h3>
+                    <div class="task-list" id="mini-doing"></div>
+                    <button class="add-btn" onclick="addTask('mini-doing')">+ Aggiungi micro-task</button>
+                </div>
+                <div class="mini-column">
+                    <h3>Fatto</h3>
+                    <div class="task-list" id="mini-done"></div>
+                    <button class="add-btn" onclick="addTask('mini-done')">+ Aggiungi micro-task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funzione per aggiungere un nuovo task testuale
+        function addTask(listId) {
+            let taskName = prompt("Inserisci il nome del task:");
+            if (taskName) {
+                let list = document.getElementById(listId);
+                let newTask = document.createElement("div");
+                newTask.className = "task";
+                newTask.innerText = taskName;
+                
+                // Se aggiungo un task principale, gli do la funzione per aprire la modale
+                if(!listId.startsWith("mini")) {
+                    newTask.onclick = function() { openModal(taskName); };
+                }
+                
+                list.appendChild(newTask);
+            }
+        }
+
+        // Funzioni per aprire e chiudere la finestra modale (Mini Pipeline)
+        function openModal(taskName) {
+            document.getElementById("modalTitle").innerText = "Dettaglio: " + taskName;
+            document.getElementById("taskModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("taskModal").style.display = "none";
+        }
+
+        // Chiude la modale se si clicca fuori dallo sfondo
+        window.onclick = function(event) {
+            let modal = document.getElementById("taskModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>
