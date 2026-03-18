@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <title>EV Internal Pipeline</title>
     <style>
         /* --- STILE ENGEL & VÖLKERS --- */
@@ -37,7 +36,7 @@
             box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; 
             transition: background-color 0.2s;
         }
-        .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; } /* Effetto quando ci trascini sopra */
+        .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; }
         
         .column.inprogress { border-top-color: var(--ev-red); }
         .column.completed { border-top-color: #333; }
@@ -57,5 +56,165 @@
         .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
-        /* PRIORITÀ BADGES VISIBILI */
-        .priority-badge { display: inline-block; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom:
+        .priority-badge { display: inline-block; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; pointer-events: none; }
+        .priority-alta { background-color: var(--ev-red); color: white; }
+        .priority-media { background-color: #FFB300; color: black; }
+        .priority-bassa { background-color: #E0E0E0; color: #333; }
+
+        /* --- MODAL E PULSANTI --- */
+        .add-macro-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
+        .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
+        .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 85%; max-width: 900px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
+        .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
+        .close-btn:hover { color: var(--ev-black); }
+        .modal-header h2 { margin: 0; color: var(--ev-black); font-size: 22px; }
+        
+        .subtask-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 11px; }
+        .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 10px; }
+        
+        .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 8px 15px; border-radius: 2px; cursor: pointer; margin-top: 15px; }
+        .add-sub-btn:hover { background-color: var(--ev-red); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">ENGEL & VÖLKERS</div>
+        <h1>Internal Automation Pipeline</h1>
+    </header>
+
+    <div class="dashboard">
+        <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
+        <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
+        <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
+    </div>
+
+    <div class="board">
+        <div class="column backlog" id="col-backlog" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'backlog')">
+            <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
+            <div class="task-list" id="list-backlog"></div>
+        </div>
+
+        <div class="column inprogress" id="col-inprogress" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'inprogress')">
+            <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
+            <div class="task-list" id="list-inprogress"></div>
+        </div>
+
+        <div class="column completed" id="col-completed" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event, 'completed')">
+            <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
+            <div class="task-list" id="list-completed"></div>
+        </div>
+    </div>
+
+    <button class="add-macro-btn" onclick="addNewMacroTask()" title="Aggiungi Nuovo Progetto">+</button>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modalTitle">Nome Progetto</h2>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="subtask-table">
+                    <thead><tr><th width="40%">Task</th><th width="20%">Status</th><th width="40%">Commento</th></tr></thead>
+                    <tbody id="subtaskTableBody"></tbody>
+                </table>
+            </div>
+            <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
+        </div>
+    </div>
+
+    <script>
+        let projectsData = [
+            { id: 1, name: "Tutor program", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Migliorare comunicazione finance", status: "In corso", comment: "" } ] },
+            { id: 2, name: "File vendite e locazioni", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Vedere se si può automatizzare", status: "In corso", comment: "" } ] },
+            { id: 3, name: "Newsletter nuovi incarichi", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
+            { id: 4, name: "Archivio antiriciclaggio", status: "backlog", priority: "Alta", subtasks: [ { title: "Programmare incontro", status: "In corso", comment: "" } ] },
+            { id: 5, name: "DB HR", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
+            { id: 6, name: "Recruiting", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
+            { id: 7, name: "File proprietà Rent", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] }
+        ];
+
+        const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
+
+        document.addEventListener('DOMContentLoaded', () => { renderBoard(); });
+
+        function renderBoard() {
+            const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
+            Object.values(lists).forEach(list => list.innerHTML = '');
+            const counts = { backlog: 0, inprogress: 0, completed: 0 };
+
+            ['backlog', 'inprogress', 'completed'].forEach(status => {
+                let columnTasks = projectsData.filter(p => p.status === status);
+                columnTasks.sort((a, b) => priorityScore[a.priority] - priorityScore[b.priority]);
+                counts[status] = columnTasks.length;
+
+                columnTasks.forEach(project => {
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    card.setAttribute('draggable', 'true');
+                    card.ondragstart = (e) => dragStart(e, project.id);
+                    card.ondblclick = () => openModal(project.id);
+                    
+                    const priorityClass = 'priority-' + project.priority.toLowerCase();
+
+                    card.innerHTML = `
+                        <div class="priority-badge ${priorityClass}">Priorità ${project.priority}</div>
+                        <h3>${project.name}</h3>
+                        <p>(Doppio clic per i dettagli)</p>
+                    `;
+                    lists[status].appendChild(card);
+                });
+            });
+
+            document.getElementById('count-backlog').innerText = counts.backlog;
+            document.getElementById('count-inprogress').innerText = counts.inprogress;
+            document.getElementById('count-completed').innerText = counts.completed;
+            document.getElementById('stat-total').innerText = projectsData.length;
+            document.getElementById('stat-inprogress').innerText = counts.inprogress;
+            document.getElementById('stat-completed').innerText = counts.completed;
+        }
+
+        function dragStart(event, id) { event.dataTransfer.setData("text/plain", id); }
+        function allowDrop(event) { event.preventDefault(); }
+        function dragEnter(event) { event.preventDefault(); event.currentTarget.classList.add('drag-over'); }
+        function dragLeave(event) { event.currentTarget.classList.remove('drag-over'); }
+        
+        function drop(event, newStatus) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            const id = parseInt(event.dataTransfer.getData("text/plain"));
+            const project = projectsData.find(p => p.id === id);
+            if (project && project.status !== newStatus) { project.status = newStatus; renderBoard(); }
+        }
+
+        function addNewMacroTask() {
+            const name = prompt("Inserisci il nome del nuovo Progetto:");
+            if (!name) return;
+            let prioInput = prompt("Priorità (numero): \n1 = Alta \n2 = Media \n3 = Bassa", "2");
+            let pLabel = prioInput === "1" ? "Alta" : (prioInput === "3" ? "Bassa" : "Media");
+            projectsData.push({ id: Date.now(), name: name, status: "backlog", priority: pLabel, subtasks: [] });
+            renderBoard();
+        }
+
+        function openModal(projectId) {
+            const project = projectsData.find(p => p.id === projectId);
+            document.getElementById('modalTitle').innerText = project.name;
+            const tbody = document.getElementById('subtaskTableBody');
+            tbody.innerHTML = '';
+            project.subtasks.forEach(sub => { tbody.innerHTML += `<tr><td>${sub.title}</td><td>${sub.status}</td><td>${sub.comment}</td></tr>`; });
+            document.getElementById('addSubTaskBtn').onclick = () => {
+                const title = prompt("Nuovo Sotto-task:");
+                if(title) { project.subtasks.push({title: title, status: 'In corso', comment: ''}); openModal(projectId); renderBoard(); }
+            };
+            document.getElementById('taskModal').style.display = 'block';
+        }
+
+        function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
+        window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
+    </script>
+</body>
+</html>
