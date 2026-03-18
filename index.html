@@ -57,16 +57,19 @@
         .close-btn:hover { color: var(--ev-black); }
         .modal-header h2 { margin: 0; color: var(--ev-black); font-size: 22px; }
         
-        .subtask-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        .project-meta { margin: 15px 0; padding: 10px; background: var(--bg-light); border-radius: 4px; border: 1px solid var(--border-color); display: inline-block; }
+        .project-meta label { font-size: 12px; font-weight: bold; color: var(--text-dark); margin-right: 10px; text-transform: uppercase; }
+
+        .subtask-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 12px; }
         .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 8px; }
         
-        /* Stile per gli input modificabili */
         .edit-input { width: 95%; padding: 6px; border: 1px solid transparent; border-radius: 3px; font-family: inherit; font-size: 13px; background-color: transparent; transition: all 0.2s; }
         .edit-input:hover { border-color: #ccc; background-color: #f5f5f5; }
         .edit-input:focus { outline: none; border-color: var(--ev-red); background-color: #fff; box-shadow: 0 0 0 2px rgba(204,0,0,0.1); }
         
-        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 12px; }
+        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 12px; cursor: pointer; }
+        .status-select:focus { outline: none; border-color: var(--ev-red); }
         
         .delete-btn { background-color: transparent; color: var(--text-light); border: none; cursor: pointer; font-size: 16px; font-weight: bold; padding: 5px 10px; }
         .delete-btn:hover { color: var(--ev-red); }
@@ -74,7 +77,6 @@
         .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
         .add-sub-btn:hover { background-color: var(--ev-red); }
         
-        /* Pulsante elimina macro task */
         .delete-macro-btn { background-color: var(--ev-white); color: var(--ev-red); border: 1px solid var(--ev-red); padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 15px; float: right; font-size: 12px;}
         .delete-macro-btn:hover { background-color: var(--ev-red); color: var(--ev-white); }
     </style>
@@ -114,7 +116,17 @@
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div class="modal-header">
                 <h2 id="modalTitle">Nome Progetto</h2>
-                <p style="color: #666; font-size: 12px;">Clicca sui testi nella tabella per modificarli. Il salvataggio è automatico.</p>
+                
+                <div class="project-meta">
+                    <label for="modalPriority">Priorità Progetto:</label>
+                    <select id="modalPriority" class="status-select" onchange="updateProjectPriority(this.value)">
+                        <option value="Alta">🔴 Alta</option>
+                        <option value="Media">🟡 Media</option>
+                        <option value="Bassa">⚪ Bassa</option>
+                    </select>
+                </div>
+                
+                <p style="color: #666; font-size: 12px; margin-top: 0;">Clicca sui testi nella tabella per modificarli. Il salvataggio è automatico.</p>
             </div>
             <div style="max-height: 50vh; overflow-y: auto;">
                 <table class="subtask-table">
@@ -128,7 +140,6 @@
     </div>
 
     <script>
-        // Array di default (usato solo la primissima volta)
         const defaultData = [
             { id: 1, name: "Tutor program", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Migliorare comunicazione finance", status: "In corso", comment: "" } ] },
             { id: 2, name: "File vendite e locazioni", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Vedere se si può automatizzare", status: "In corso", comment: "" } ] },
@@ -141,28 +152,19 @@
         const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
         let currentEditingProjectId = null;
 
-        // --- GESTIONE MEMORIA (LOCAL STORAGE) ---
         function loadData() {
             const savedData = localStorage.getItem('ev_pipeline_data');
-            if (savedData) {
-                projectsData = JSON.parse(savedData);
-            } else {
-                projectsData = JSON.parse(JSON.stringify(defaultData)); // Clona array di default
-                saveData(); // Salva subito
-            }
+            if (savedData) { projectsData = JSON.parse(savedData); } 
+            else { projectsData = JSON.parse(JSON.stringify(defaultData)); saveData(); }
         }
 
         function saveData() {
             localStorage.setItem('ev_pipeline_data', JSON.stringify(projectsData));
-            renderBoard(); // Aggiorna la vista dopo aver salvato
+            renderBoard(); 
         }
 
-        document.addEventListener('DOMContentLoaded', () => { 
-            loadData(); 
-            renderBoard(); 
-        });
+        document.addEventListener('DOMContentLoaded', () => { loadData(); renderBoard(); });
 
-        // --- RENDER BOARD KANBAN ---
         function renderBoard() {
             const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
             Object.values(lists).forEach(list => list.innerHTML = '');
@@ -199,7 +201,6 @@
             document.getElementById('stat-completed').innerText = counts.completed;
         }
 
-        // --- FUNZIONI DRAG AND DROP ---
         function dragStart(event, id) { event.dataTransfer.setData("text/plain", id); }
         function allowDrop(event) { event.preventDefault(); }
         function dragEnter(event) { event.preventDefault(); event.currentTarget.classList.add('drag-over'); }
@@ -210,38 +211,34 @@
             event.currentTarget.classList.remove('drag-over');
             const id = parseInt(event.dataTransfer.getData("text/plain"));
             const project = projectsData.find(p => p.id === id);
-            if (project && project.status !== newStatus) { 
-                project.status = newStatus; 
-                saveData(); // SALVA MODIFICA
-            }
+            if (project && project.status !== newStatus) { project.status = newStatus; saveData(); }
         }
 
-        // --- AGGIUNTA PROGETTO ---
         function addNewMacroTask() {
             const name = prompt("Inserisci il nome del nuovo Progetto:");
             if (!name) return;
             let prioInput = prompt("Priorità (numero): \n1 = Alta \n2 = Media \n3 = Bassa", "2");
             let pLabel = prioInput === "1" ? "Alta" : (prioInput === "3" ? "Bassa" : "Media");
             projectsData.push({ id: Date.now(), name: name, status: "backlog", priority: pLabel, subtasks: [] });
-            saveData(); // SALVA NUOVO PROGETTO
+            saveData(); 
         }
 
-        // --- MODALE E GESTIONE SOTTO-TASK INTERATTIVI ---
         function openModal(projectId) {
             currentEditingProjectId = projectId;
             const project = projectsData.find(p => p.id === projectId);
             document.getElementById('modalTitle').innerText = project.name;
             
+            // Imposta il valore della tendina Priorità
+            document.getElementById('modalPriority').value = project.priority;
+            
             renderSubTasksTable(project);
 
-            // Pulsante Aggiungi
             document.getElementById('addSubTaskBtn').onclick = () => {
                 project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" });
                 saveData();
-                renderSubTasksTable(project); // Aggiorna solo la modale
+                renderSubTasksTable(project); 
             };
 
-            // Pulsante Elimina Progetto
             document.getElementById('deleteMacroBtn').onclick = () => {
                 if(confirm("Sei sicuro di voler eliminare interamente questo progetto e tutti i suoi sub-task?")) {
                     projectsData = projectsData.filter(p => p.id !== projectId);
@@ -251,6 +248,17 @@
             };
 
             document.getElementById('taskModal').style.display = 'block';
+        }
+
+        // NUOVA FUNZIONE: Aggiorna la priorità
+        function updateProjectPriority(newPriority) {
+            if (currentEditingProjectId) {
+                const project = projectsData.find(p => p.id === currentEditingProjectId);
+                if (project) {
+                    project.priority = newPriority;
+                    saveData(); // Salva e riordina immediatamente la lavagna dietro!
+                }
+            }
         }
 
         function renderSubTasksTable(project) {
@@ -285,28 +293,17 @@
 
         function updateSubTask(projectId, subIndex, field, newValue) {
             const project = projectsData.find(p => p.id === projectId);
-            if (project && project.subtasks[subIndex]) {
-                project.subtasks[subIndex][field] = newValue;
-                saveData(); // SALVA AUTOMATICAMENTE
-            }
+            if (project && project.subtasks[subIndex]) { project.subtasks[subIndex][field] = newValue; saveData(); }
         }
 
         function deleteSubTask(projectId, subIndex) {
             if(confirm("Eliminare questo sotto-task?")) {
                 const project = projectsData.find(p => p.id === projectId);
-                if (project) {
-                    project.subtasks.splice(subIndex, 1);
-                    saveData();
-                    renderSubTasksTable(project); // Ricarica tabella
-                }
+                if (project) { project.subtasks.splice(subIndex, 1); saveData(); renderSubTasksTable(project); }
             }
         }
 
-        function closeModal() { 
-            document.getElementById('taskModal').style.display = 'none'; 
-            currentEditingProjectId = null;
-        }
-        
+        function closeModal() { document.getElementById('taskModal').style.display = 'none'; currentEditingProjectId = null; }
         window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
     </script>
 </body>
