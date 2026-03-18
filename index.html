@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <title>EV Internal Pipeline</title>
     <style>
         /* --- STILE ENGEL & VÖLKERS --- */
@@ -16,332 +17,45 @@
             --text-light: #888888;
         }
 
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--ev-white);
-            margin: 0;
-            padding: 0;
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        header {
-            width: 100%;
-            background-color: var(--ev-black);
-            color: var(--ev-white);
-            padding: 20px 0;
-            text-align: center;
-            border-bottom: 4px solid var(--ev-red);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .logo-placeholder {
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 300;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--text-light);
-        }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--ev-white); margin: 0; padding: 0; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; }
+        header { width: 100%; background-color: var(--ev-black); color: var(--ev-white); padding: 20px 0; text-align: center; border-bottom: 4px solid var(--ev-red); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .logo-placeholder { font-size: 24px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
 
         /* --- DASHBOARD --- */
-        .dashboard {
-            display: flex;
-            gap: 20px;
-            margin: 30px 0;
-            width: 90%;
-            max-width: 1200px;
-            justify-content: space-between;
-        }
-
-        .stat-card {
-            background-color: var(--bg-light);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 20px;
-            flex: 1;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+        .dashboard { display: flex; gap: 20px; margin: 30px 0; width: 90%; max-width: 1200px; justify-content: space-between; }
+        .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px; flex: 1; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: var(--text-light); }
         .stat-card .value { font-size: 36px; font-weight: bold; color: var(--ev-black); }
         .stat-card .value.red { color: var(--ev-red); }
 
         /* --- BOARD KANBAN --- */
-        .board {
-            display: flex;
-            gap: 25px;
-            width: 95%;
-            max-width: 1400px;
-            justify-content: center;
-            align-items: flex-start;
-            margin-bottom: 50px;
+        .board { display: flex; gap: 25px; width: 95%; max-width: 1400px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
+        
+        .column { 
+            background-color: var(--bg-light); border-radius: 4px; width: 32%; min-width: 300px; padding: 20px; 
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; 
+            transition: background-color 0.2s;
         }
-
-        .column {
-            background-color: var(--bg-light);
-            border-radius: 4px;
-            width: 32%;
-            min-width: 300px;
-            padding: 20px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-            border-top: 3px solid var(--ev-black);
-            min-height: 300px; /* Area per il drag and drop */
-        }
+        .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; } /* Effetto quando ci trascini sopra */
         
         .column.inprogress { border-top-color: var(--ev-red); }
         .column.completed { border-top-color: #333; }
-
-        .column h2 {
-            font-size: 16px; margin-top: 0; color: var(--ev-black); text-transform: uppercase;
-            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .column h2 { font-size: 16px; margin-top: 0; color: var(--ev-black); text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .task-count { font-size: 12px; background: #ddd; color: #555; padding: 2px 6px; border-radius: 10px; }
         
-        .task-list { min-height: 250px; }
+        .task-list { min-height: 300px; }
 
         /* --- TASK CARD & DRAG AND DROP --- */
         .task-card {
-            background-color: var(--ev-white);
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            cursor: grab; /* Cursore per trascinamento */
-            transition: box-shadow 0.2s;
-            border-left: 3px solid transparent;
-            position: relative;
+            background-color: var(--ev-white); padding: 15px; border-radius: 4px; margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: grab; border-left: 4px solid transparent; position: relative;
         }
-        .task-card:active { cursor: grabbing; opacity: 0.8; }
-        .task-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.15); border-left-color: var(--ev-red); }
+        .task-card:active { cursor: grabbing; opacity: 0.6; transform: scale(0.98); }
+        .task-card:hover { box-shadow: 0 5px 10px rgba(0,0,0,0.15); border-left-color: var(--ev-red); }
         
-        .task-card h3 { margin: 5px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; }
-        .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); }
+        .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
+        .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
-        /* Priorità Badges */
-        .priority-badge {
-            display: inline-block;
-            font-size: 10px;
-            padding: 3px 6px;
-            border-radius: 3px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        .priority-alta { background-color: #ffebee; color: var(--ev-red); border: 1px solid #ffcdd2; }
-        .priority-media { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
-        .priority-bassa { background-color: #f5f5f5; color: #777; border: 1px solid #e0e0e0; }
-
-        .subtask-badge {
-            font-size: 10px; background-color: #eee; color: #777;
-            padding: 1px 5px; border-radius: 4px; position: absolute; top: 15px; right: 15px;
-        }
-
-        /* --- MODAL E PULSANTI --- */
-        .add-macro-btn {
-            position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red);
-            color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px;
-            font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90;
-        }
-        .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
-
-        .modal {
-            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; 
-            background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
-        }
-        .modal-content {
-            background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px;
-            width: 85%; max-width: 900px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative;
-            border-top: 5px solid var(--ev-red);
-        }
-        .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
-        .close-btn:hover { color: var(--ev-black); }
-        .modal-header h2 { margin: 0; color: var(--ev-black); font-size: 22px; }
-        
-        .subtask-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 11px; }
-        .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 10px; }
-        
-        .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 8px 15px; border-radius: 2px; cursor: pointer; margin-top: 15px; }
-        .add-sub-btn:hover { background-color: var(--ev-red); }
-    </style>
-</head>
-<body>
-
-    <header>
-        <div class="logo-placeholder">ENGEL & VÖLKERS</div>
-        <h1>Internal Automation Pipeline</h1>
-    </header>
-
-    <div class="dashboard">
-        <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
-        <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
-        <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
-    </div>
-
-    <div class="board">
-        <div class="column backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')">
-            <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
-            <div class="task-list" id="list-backlog"></div>
-        </div>
-
-        <div class="column inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')">
-            <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
-            <div class="task-list" id="list-inprogress"></div>
-        </div>
-
-        <div class="column completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')">
-            <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
-            <div class="task-list" id="list-completed"></div>
-        </div>
-    </div>
-
-    <button class="add-macro-btn" onclick="addNewMacroTask()" title="Aggiungi Nuovo Progetto">+</button>
-
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div class="modal-header">
-                <h2 id="modalTitle">Nome Progetto</h2>
-            </div>
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table class="subtask-table">
-                    <thead><tr><th width="40%">Task</th><th width="20%">Status</th><th width="40%">Commento</th></tr></thead>
-                    <tbody id="subtaskTableBody"></tbody>
-                </table>
-            </div>
-            <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
-        </div>
-    </div>
-
-    <script>
-        // Dati aggiornati con la priorità (1 = Alta, 2 = Media, 3 = Bassa basato sul tuo file)
-        let projectsData = [
-            { id: 1, name: "Tutor program", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Migliorare comunicazione finance", status: "In corso", comment: "" } ] },
-            { id: 2, name: "File vendite e locazioni", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Vedere se si può automatizzare", status: "In corso", comment: "" } ] },
-            { id: 3, name: "Newsletter nuovi incarichi", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
-            { id: 4, name: "Archivio antiriciclaggio", status: "backlog", priority: "Alta", subtasks: [ { title: "Programmare incontro", status: "In corso", comment: "" } ] },
-            { id: 5, name: "DB HR", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
-            { id: 6, name: "Recruiting", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
-            { id: 7, name: "File proprietà Rent", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] }
-        ];
-
-        // Mappatura per ordinamento
-        const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
-
-        document.addEventListener('DOMContentLoaded', () => { renderBoard(); });
-
-        function renderBoard() {
-            const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
-            Object.values(lists).forEach(list => list.innerHTML = '');
-
-            const counts = { backlog: 0, inprogress: 0, completed: 0 };
-
-            // Ciclo sulle 3 colonne
-            ['backlog', 'inprogress', 'completed'].forEach(status => {
-                // Filtra e ordina per priorità (Alta -> Bassa)
-                let columnTasks = projectsData.filter(p => p.status === status);
-                columnTasks.sort((a, b) => priorityScore[a.priority] - priorityScore[b.priority]);
-                
-                counts[status] = columnTasks.length;
-
-                columnTasks.forEach(project => {
-                    const card = document.createElement('div');
-                    card.className = 'task-card';
-                    card.setAttribute('draggable', 'true');
-                    card.ondragstart = (e) => dragStart(e, project.id);
-                    
-                    // Solo sul testo apre la modale per non interferire col drag
-                    card.ondblclick = () => openModal(project.id);
-                    
-                    const priorityClass = 'priority-' + project.priority.toLowerCase();
-
-                    card.innerHTML = `
-                        <div class="priority-badge ${priorityClass}">${project.priority}</div>
-                        <h3 onclick="openModal(${project.id})">${project.name}</h3>
-                        <p onclick="openModal(${project.id})">${project.subtasks.length} task operativi</p>
-                    `;
-                    lists[status].appendChild(card);
-                });
-            });
-
-            document.getElementById('count-backlog').innerText = counts.backlog;
-            document.getElementById('count-inprogress').innerText = counts.inprogress;
-            document.getElementById('count-completed').innerText = counts.completed;
-
-            document.getElementById('stat-total').innerText = projectsData.length;
-            document.getElementById('stat-inprogress').innerText = counts.inprogress;
-            document.getElementById('stat-completed').innerText = counts.completed;
-        }
-
-        // --- DRAG AND DROP FUNZIONI ---
-        function dragStart(event, id) {
-            event.dataTransfer.setData("text/plain", id);
-        }
-
-        function allowDrop(event) {
-            event.preventDefault(); // Necessario per permettere il drop
-        }
-
-        function drop(event, newStatus) {
-            event.preventDefault();
-            const id = parseInt(event.dataTransfer.getData("text/plain"));
-            const project = projectsData.find(p => p.id === id);
-            
-            if (project && project.status !== newStatus) {
-                project.status = newStatus;
-                renderBoard(); // Ridisegna tutto per aggiornare le colonne e ordinare
-            }
-        }
-
-        // --- AGGIUNTA NUOVO PROGETTO ---
-        function addNewMacroTask() {
-            const name = prompt("Inserisci il nome del nuovo Progetto:");
-            if (!name) return;
-            
-            let prioInput = prompt("Seleziona Priorità (inserisci il numero): \n1 = Alta \n2 = Media \n3 = Bassa", "2");
-            let pLabel = "Media";
-            if(prioInput === "1") pLabel = "Alta";
-            if(prioInput === "3") pLabel = "Bassa";
-
-            projectsData.push({ id: Date.now(), name: name, status: "backlog", priority: pLabel, subtasks: [] });
-            renderBoard();
-        }
-
-        // --- GESTIONE MODALE ---
-        let currentEditingProjectId = null;
-        function openModal(projectId) {
-            currentEditingProjectId = projectId;
-            const project = projectsData.find(p => p.id === projectId);
-            document.getElementById('modalTitle').innerText = project.name;
-            
-            const tbody = document.getElementById('subtaskTableBody');
-            tbody.innerHTML = '';
-            
-            project.subtasks.forEach(sub => {
-                tbody.innerHTML += `<tr><td>${sub.title}</td><td>${sub.status}</td><td>${sub.comment}</td></tr>`;
-            });
-            
-            document.getElementById('addSubTaskBtn').onclick = () => {
-                const title = prompt("Sotto-task:");
-                if(title) { project.subtasks.push({title: title, status: 'In corso', comment: ''}); openModal(projectId); renderBoard(); }
-            };
-            document.getElementById('taskModal').style.display = 'block';
-        }
-
-        function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
-        window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
-    </script>
-</body>
-</html>
+        /* PRIORITÀ BADGES VISIBILI */
+        .priority-badge { display: inline-block; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom:
