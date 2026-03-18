@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Internal Pipeline</title>
     <style>
-        /* --- STILE ENGEL & VÖLKERS (Bianco, Nero, Rosso) --- */
+        /* --- STILE ENGEL & VÖLKERS --- */
         :root {
             --ev-black: #111111;
             --ev-white: #FFFFFF;
-            --ev-red: #CC0000; /* Rosso istituzionale per accenti */
+            --ev-red: #CC0000;
             --bg-light: #F9F9F9;
             --border-color: #EEEEEE;
             --text-dark: #333333;
@@ -27,7 +27,6 @@
             align-items: center;
         }
 
-        /* --- HEADER & LOGO --- */
         header {
             width: 100%;
             background-color: var(--ev-black);
@@ -45,9 +44,6 @@
             text-transform: uppercase;
             margin-bottom: 10px;
         }
-        
-        /* Simulo il logo EV con testo stilizzato */
-        .ev-logo-text { font-family: Georgia, serif; font-weight: normal; }
 
         header h1 {
             margin: 0;
@@ -58,7 +54,7 @@
             color: var(--text-light);
         }
 
-        /* --- DASHBOARD CONTATORI --- */
+        /* --- DASHBOARD --- */
         .dashboard {
             display: flex;
             gap: 20px;
@@ -76,15 +72,12 @@
             flex: 1;
             text-align: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
         }
-        .stat-card:hover { transform: translateY(-3px); border-color: #ccc; }
-
-        .stat-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: var(--text-light); letter-spacing: 1px;}
+        .stat-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: var(--text-light); }
         .stat-card .value { font-size: 36px; font-weight: bold; color: var(--ev-black); }
         .stat-card .value.red { color: var(--ev-red); }
 
-        /* --- BOARD KANBAN PRINCIPALE --- */
+        /* --- BOARD KANBAN --- */
         .board {
             display: flex;
             gap: 25px;
@@ -103,199 +96,112 @@
             padding: 20px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.05);
             border-top: 3px solid var(--ev-black);
+            min-height: 300px; /* Area per il drag and drop */
         }
         
         .column.inprogress { border-top-color: var(--ev-red); }
         .column.completed { border-top-color: #333; }
 
         .column h2 {
-            font-size: 16px;
-            margin-top: 0;
-            color: var(--ev-black);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 16px; margin-top: 0; color: var(--ev-black); text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        
         .task-count { font-size: 12px; background: #ddd; color: #555; padding: 2px 6px; border-radius: 10px; }
-
-        .task-list { min-height: 100px; }
         
-        /* --- SINGOLA MACRO-TASK (PROGETTO) --- */
+        .task-list { min-height: 250px; }
+
+        /* --- TASK CARD & DRAG AND DROP --- */
         .task-card {
             background-color: var(--ev-white);
             padding: 15px;
-            border-radius: 2px;
+            border-radius: 4px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.07);
-            cursor: pointer;
-            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: grab; /* Cursore per trascinamento */
+            transition: box-shadow 0.2s;
             border-left: 3px solid transparent;
             position: relative;
         }
-        .task-card:hover { 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-            border-left-color: var(--ev-red);
-        }
+        .task-card:active { cursor: grabbing; opacity: 0.8; }
+        .task-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.15); border-left-color: var(--ev-red); }
         
-        .task-card h3 { margin: 0; font-size: 15px; color: var(--ev-black); font-weight: 600; }
+        .task-card h3 { margin: 5px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; }
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); }
         
-        /* Badge sotto-task completati */
-        .subtask-badge {
+        /* Priorità Badges */
+        .priority-badge {
+            display: inline-block;
             font-size: 10px;
-            background-color: #eee;
-            color: #777;
-            padding: 1px 5px;
-            border-radius: 4px;
-            position: absolute;
-            top: 15px;
-            right: 15px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .priority-alta { background-color: #ffebee; color: var(--ev-red); border: 1px solid #ffcdd2; }
+        .priority-media { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+        .priority-bassa { background-color: #f5f5f5; color: #777; border: 1px solid #e0e0e0; }
+
+        .subtask-badge {
+            font-size: 10px; background-color: #eee; color: #777;
+            padding: 1px 5px; border-radius: 4px; position: absolute; top: 15px; right: 15px;
         }
 
-        /* --- PULSANTI AGGIUNTA --- */
+        /* --- MODAL E PULSANTI --- */
         .add-macro-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: var(--ev-red);
-            color: var(--ev-white);
-            border: none;
-            border-radius: 50%;
-            width: 60px; height: 60px;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(204,0,0,0.4);
-            transition: all 0.2s;
-            z-index: 90;
+            position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red);
+            color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px;
+            font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90;
         }
         .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
 
-        .add-sub-btn {
-            background-color: var(--ev-black);
-            color: var(--ev-white);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 15px;
-            transition: background 0.2s;
-        }
-        .add-sub-btn:hover { background-color: var(--ev-red); }
-
-        /* --- FINESTRA MODALE DETTAGLIO --- */
         .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 100; 
-            left: 0; top: 0; 
-            width: 100%; height: 100%; 
-            background-color: rgba(0,0,0,0.7); 
-            backdrop-filter: blur(2px);
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px);
         }
         .modal-content {
-            background-color: var(--ev-white);
-            margin: 4% auto;
-            padding: 30px;
-            border-radius: 4px;
-            width: 85%;
-            max-width: 900px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            position: relative;
+            background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px;
+            width: 85%; max-width: 900px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative;
             border-top: 5px solid var(--ev-red);
         }
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 20px;
-            color: var(--text-light);
-            font-size: 24px;
-            cursor: pointer;
-        }
+        .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
         .close-btn:hover { color: var(--ev-black); }
-        
         .modal-header h2 { margin: 0; color: var(--ev-black); font-size: 22px; }
-        .modal-header p { margin: 5px 0 20px 0; color: var(--text-light); font-size: 13px;}
-
-        /* Tabella Sub-tasks (stile Spreadsheet) */
-        .subtask-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-        .subtask-table th {
-            text-align: left;
-            background-color: var(--ev-black);
-            color: var(--ev-white);
-            padding: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 11px;
-        }
-        .subtask-table td {
-            border-bottom: 1px solid var(--border-color);
-            padding: 10px;
-            vertical-align: top;
-        }
-        .subtask-table tr:hover td { background-color: var(--bg-light); }
         
-        /* Dropdown stato subtask */
-        .status-select {
-            border: 1px solid #ccc;
-            padding: 3px;
-            font-size: 11px;
-            border-radius: 2px;
-            background: white;
-        }
-        .status-select.in-corso { color: var(--ev-red); font-weight: bold;}
-        .status-select.completata { color: #555; text-decoration: line-through;}
-
+        .subtask-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 11px; }
+        .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 10px; }
+        
+        .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 8px 15px; border-radius: 2px; cursor: pointer; margin-top: 15px; }
+        .add-sub-btn:hover { background-color: var(--ev-red); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo-placeholder">
-            ENGEL & VÖLKERS
-        </div>
+        <div class="logo-placeholder">ENGEL & VÖLKERS</div>
         <h1>Internal Automation Pipeline</h1>
     </header>
 
     <div class="dashboard">
-        <div class="stat-card">
-            <h3>Totale Progetti</h3>
-            <div class="value" id="stat-total">0</div>
-        </div>
-        <div class="stat-card">
-            <h3>In Corso</h3>
-            <div class="value red" id="stat-inprogress">0</div>
-        </div>
-        <div class="stat-card">
-            <h3>Completati</h3>
-            <div class="value" id="stat-completed">0</div>
-        </div>
+        <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
+        <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
+        <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
     </div>
 
     <div class="board">
-        <div class="column backlog" id="col-backlog">
+        <div class="column backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')">
             <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
             <div class="task-list" id="list-backlog"></div>
         </div>
 
-        <div class="column inprogress" id="col-inprogress">
+        <div class="column inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')">
             <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
             <div class="task-list" id="list-inprogress"></div>
         </div>
 
-        <div class="column completed" id="col-completed">
+        <div class="column completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')">
             <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
             <div class="task-list" id="list-completed"></div>
         </div>
@@ -307,237 +213,135 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div class="modal-header">
-                <h2 id="modalTitle">Nome del Progetto</h2>
-                <p>Gestione dei sotto-task operativi e dei risultati.</p>
+                <h2 id="modalTitle">Nome Progetto</h2>
             </div>
-            
             <div style="max-height: 400px; overflow-y: auto;">
                 <table class="subtask-table">
-                    <thead>
-                        <tr>
-                            <th width="40%">Task</th>
-                            <th width="20%">Status</th>
-                            <th width="20%">Commento</th>
-                            <th width="20%">Esito</th>
-                        </tr>
-                    </thead>
-                    <tbody id="subtaskTableBody">
-                        </tbody>
+                    <thead><tr><th width="40%">Task</th><th width="20%">Status</th><th width="40%">Commento</th></tr></thead>
+                    <tbody id="subtaskTableBody"></tbody>
                 </table>
             </div>
-            
             <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
         </div>
     </div>
 
     <script>
-        // --- DATA MIGRATION: DATI DELLO SPREADSHEET ---
-        // Struttura: Array di Oggetti Progetto (Macro Tasks)
+        // Dati aggiornati con la priorità (1 = Alta, 2 = Media, 3 = Bassa basato sul tuo file)
         let projectsData = [
-            {
-                id: 1, name: "Tutor program", status: "inprogress", subtasks: [
-                    { title: "Migliorare comunicazione finance", status: "In corso", comment: "", esito: "" },
-                    { title: "Creare storico", status: "In corso", comment: "(mail spreadsheet?)", esito: "" },
-                    { title: "Migliorare logica tutor Bologna & Firenze", status: "In corso", comment: "", esito: "" }
-                ]
-            },
-            {
-                id: 2, name: "File vendite e locazioni", status: "inprogress", subtasks: [
-                    { title: "Analizzare cosa la rallenta (con Dewi)", status: "In corso", comment: "", esito: "" },
-                    { title: "Vedere se si può automatizzare", status: "In corso", comment: "", esito: "" },
-                    { title: "Creare un db foto degli agenti?", status: "In corso", comment: "foto agenti su eva?", esito: "" }
-                ]
-            },
-            {
-                id: 3, name: "Newsletter nuovi incarichi", status: "inprogress", subtasks: [
-                    { title: "Reperire dati (date on market)", status: "In corso", comment: "", esito: "" },
-                    { title: "Incontro marketing per estetica mail", status: "In corso", comment: "", esito: "" },
-                    { title: "Anche qui db foto agenti", status: "In corso", comment: "foto agenti su eva?", esito: "" }
-                ]
-            },
-            {
-                id: 4, name: "Archivio antiriciclaggio", status: "backlog", subtasks: [
-                    { title: "Programmare incontro", status: "In corso", comment: "", esito: "" }
-                ]
-            },
-            {
-                id: 5, name: "DB HR", status: "backlog", subtasks: [
-                    { title: "Reperire dati (date on market)", status: "In corso", comment: "", esito: "" }
-                ]
-            },
-            {
-                id: 6, name: "Recruiting", status: "backlog", subtasks: [
-                    { title: "Reperire dati (date on market)", status: "In corso", comment: "", esito: "" }
-                ]
-            },
-            {
-                id: 7, name: "File proprietà Rent", status: "backlog", subtasks: [
-                    { title: "Reperire dati (date on market)", status: "In corso", comment: "", esito: "" }
-                ]
-            }
+            { id: 1, name: "Tutor program", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Migliorare comunicazione finance", status: "In corso", comment: "" } ] },
+            { id: 2, name: "File vendite e locazioni", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Vedere se si può automatizzare", status: "In corso", comment: "" } ] },
+            { id: 3, name: "Newsletter nuovi incarichi", status: "inprogress", priority: "Bassa", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
+            { id: 4, name: "Archivio antiriciclaggio", status: "backlog", priority: "Alta", subtasks: [ { title: "Programmare incontro", status: "In corso", comment: "" } ] },
+            { id: 5, name: "DB HR", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
+            { id: 6, name: "Recruiting", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] },
+            { id: 7, name: "File proprietà Rent", status: "backlog", priority: "Alta", subtasks: [ { title: "Reperire dati", status: "In corso", comment: "" } ] }
         ];
 
-        let currentEditingProjectId = null;
+        // Mappatura per ordinamento
+        const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
 
-        // --- INIZIALIZZAZIONE APPLICAZIONE ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderBoard();
-        });
+        document.addEventListener('DOMContentLoaded', () => { renderBoard(); });
 
-        // --- FUNZIONE DI RENDERING PRINCIPALE ---
         function renderBoard() {
-            // Svuota le liste attuali
-            const lists = {
-                backlog: document.getElementById('list-backlog'),
-                inprogress: document.getElementById('list-inprogress'),
-                completed: document.getElementById('list-completed')
-            };
+            const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
             Object.values(lists).forEach(list => list.innerHTML = '');
 
-            // Contatori
             const counts = { backlog: 0, inprogress: 0, completed: 0 };
 
-            // Renderizza i progetti
-            projectsData.forEach(project => {
-                const targetList = lists[project.status];
-                if (targetList) {
-                    counts[project.status]++;
-                    
+            // Ciclo sulle 3 colonne
+            ['backlog', 'inprogress', 'completed'].forEach(status => {
+                // Filtra e ordina per priorità (Alta -> Bassa)
+                let columnTasks = projectsData.filter(p => p.status === status);
+                columnTasks.sort((a, b) => priorityScore[a.priority] - priorityScore[b.priority]);
+                
+                counts[status] = columnTasks.length;
+
+                columnTasks.forEach(project => {
                     const card = document.createElement('div');
                     card.className = 'task-card';
-                    card.onclick = () => openModal(project.id);
+                    card.setAttribute('draggable', 'true');
+                    card.ondragstart = (e) => dragStart(e, project.id);
                     
-                    const completedSub = project.subtasks.filter(s => s.status === 'Completata').length;
-                    const totalSub = project.subtasks.length;
+                    // Solo sul testo apre la modale per non interferire col drag
+                    card.ondblclick = () => openModal(project.id);
                     
+                    const priorityClass = 'priority-' + project.priority.toLowerCase();
+
                     card.innerHTML = `
-                        <h3>${project.name}</h3>
-                        <p>${totalSub} task operativi inseriti</p>
-                        <span class="subtask-badge">${completedSub}/${totalSub}</span>
+                        <div class="priority-badge ${priorityClass}">${project.priority}</div>
+                        <h3 onclick="openModal(${project.id})">${project.name}</h3>
+                        <p onclick="openModal(${project.id})">${project.subtasks.length} task operativi</p>
                     `;
-                    targetList.appendChild(card);
-                }
+                    lists[status].appendChild(card);
+                });
             });
 
-            // Aggiorna contatori visivi nelle colonne
             document.getElementById('count-backlog').innerText = counts.backlog;
             document.getElementById('count-inprogress').innerText = counts.inprogress;
             document.getElementById('count-completed').innerText = counts.completed;
 
-            // Aggiorna Dashboard Statistiche
-            updateDashboard(counts);
-        }
-
-        // Aggiorna i contatori della Dashboard in alto
-        function updateDashboard(counts) {
-            const total = projectsData.length;
-            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-total').innerText = projectsData.length;
             document.getElementById('stat-inprogress').innerText = counts.inprogress;
             document.getElementById('stat-completed').innerText = counts.completed;
         }
 
-        // --- AGGIUNTA NUOVI DATI (Ephemeral per ora) ---
-        function addNewMacroTask() {
-            const name = prompt("Inserisci il nome del nuovo Progetto (Macro-Task):");
-            if (name) {
-                const newProject = {
-                    id: Date.now(), // ID univoco temporaneo
-                    name: name,
-                    status: "backlog", // Di default nel backlog
-                    subtasks: []
-                };
-                projectsData.push(newProject);
-                renderBoard();
+        // --- DRAG AND DROP FUNZIONI ---
+        function dragStart(event, id) {
+            event.dataTransfer.setData("text/plain", id);
+        }
+
+        function allowDrop(event) {
+            event.preventDefault(); // Necessario per permettere il drop
+        }
+
+        function drop(event, newStatus) {
+            event.preventDefault();
+            const id = parseInt(event.dataTransfer.getData("text/plain"));
+            const project = projectsData.find(p => p.id === id);
+            
+            if (project && project.status !== newStatus) {
+                project.status = newStatus;
+                renderBoard(); // Ridisegna tutto per aggiornare le colonne e ordinare
             }
         }
 
-        // --- GESTIONE FINESTRA MODALE DETTAGLIO ---
+        // --- AGGIUNTA NUOVO PROGETTO ---
+        function addNewMacroTask() {
+            const name = prompt("Inserisci il nome del nuovo Progetto:");
+            if (!name) return;
+            
+            let prioInput = prompt("Seleziona Priorità (inserisci il numero): \n1 = Alta \n2 = Media \n3 = Bassa", "2");
+            let pLabel = "Media";
+            if(prioInput === "1") pLabel = "Alta";
+            if(prioInput === "3") pLabel = "Bassa";
+
+            projectsData.push({ id: Date.now(), name: name, status: "backlog", priority: pLabel, subtasks: [] });
+            renderBoard();
+        }
+
+        // --- GESTIONE MODALE ---
+        let currentEditingProjectId = null;
         function openModal(projectId) {
             currentEditingProjectId = projectId;
             const project = projectsData.find(p => p.id === projectId);
-            if (!project) return;
-
             document.getElementById('modalTitle').innerText = project.name;
-            const tableBody = document.getElementById('subtaskTableBody');
-            tableBody.innerHTML = ''; // Svuota tabella
-
-            // Popola tabella sub-tasks
-            if (project.subtasks.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Nessun sotto-task inserito.</td></tr>';
-            } else {
-                project.subtasks.forEach((sub, index) => {
-                    const row = document.createElement('tr');
-                    
-                    // Define status class for styling
-                    const statusClass = sub.status === 'In corso' ? 'in-corso' : (sub.status === 'Completata' ? 'completata' : '');
-
-                    row.innerHTML = `
-                        <td>${sub.title}</td>
-                        <td>
-                            <select class="status-select ${statusClass}" onchange="updateSubTaskStatus(${index}, this.value)">
-                                <option value="In corso" ${sub.status === 'In corso' ? 'selected' : ''}>In corso</option>
-                                <option value="Completata" ${sub.status === 'Completata' ? 'selected' : ''}>Completata</option>
-                                <option value="Aggiunta/Nuova" ${sub.status === 'Aggiunta/Nuova' ? 'selected' : ''}>Nuova</option>
-                            </select>
-                        </td>
-                        <td>${sub.comment || ''}</td>
-                        <td>${sub.esito || ''}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-
-            // Configura pulsante aggiunta sub-task
-            document.getElementById('addSubTaskBtn').onclick = () => addNewSubTask(projectId);
-
+            
+            const tbody = document.getElementById('subtaskTableBody');
+            tbody.innerHTML = '';
+            
+            project.subtasks.forEach(sub => {
+                tbody.innerHTML += `<tr><td>${sub.title}</td><td>${sub.status}</td><td>${sub.comment}</td></tr>`;
+            });
+            
+            document.getElementById('addSubTaskBtn').onclick = () => {
+                const title = prompt("Sotto-task:");
+                if(title) { project.subtasks.push({title: title, status: 'In corso', comment: ''}); openModal(projectId); renderBoard(); }
+            };
             document.getElementById('taskModal').style.display = 'block';
         }
 
-        function closeModal() {
-            document.getElementById('taskModal').style.display = 'none';
-            currentEditingProjectId = null;
-        }
-
-        // Aggiunta Sub-task dentro la modale
-        function addNewSubTask(projectId) {
-            const title = prompt("Inserisci il sotto-task operativo:");
-            if (title) {
-                const project = projectsData.find(p => p.id === projectId);
-                if (project) {
-                    project.subtasks.push({
-                        title: title,
-                        status: "Aggiunta/Nuova",
-                        comment: "",
-                        esito: ""
-                    });
-                    // Riapri la modale per aggiornare la tabella
-                    openModal(projectId); 
-                    // Aggiorna anche la board principale (per il badge dei contatori)
-                    renderBoard();
-                }
-            }
-        }
-        
-        // Aggiorna lo stato di un subtask (ephemeral)
-        function updateSubTaskStatus(subTaskIndex, newStatus) {
-            if(currentEditingProjectId) {
-                const project = projectsData.find(p => p.id === currentEditingProjectId);
-                if(project && project.subtasks[subTaskIndex]) {
-                    project.subtasks[subTaskIndex].status = newStatus;
-                    renderBoard(); // Aggiorna board principale per contatori
-                    openModal(currentEditingProjectId); // Aggiorna stile tabella
-                }
-            }
-        }
-
-        // Chiude la modale se si clicca fuori dallo sfondo
-        window.onclick = function(event) {
-            let modal = document.getElementById('taskModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
+        function closeModal() { document.getElementById('taskModal').style.display = 'none'; }
+        window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
     </script>
-
 </body>
 </html>
