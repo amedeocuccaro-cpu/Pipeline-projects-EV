@@ -53,9 +53,14 @@
         .priority-bassa { background-color: #E0E0E0; color: #333; }
         .dept-badge { font-size: 10px; color: #666; background: #eee; padding: 3px 6px; border-radius: 3px; float: right; pointer-events: none; }
 
+        /* --- BOTTONI GLOBALI (IN BASSO) --- */
         .add-macro-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
         .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
+        
+        .save-global-btn { position: fixed; bottom: 35px; left: 30px; background-color: var(--ev-black); color: var(--ev-white); border: none; border-radius: 30px; padding: 15px 25px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 90; transition: background 0.2s; letter-spacing: 1px;}
+        .save-global-btn:hover { background-color: #333; transform: scale(1.05); }
 
+        /* --- MODALE --- */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
         .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 90%; max-width: 1000px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
         .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
@@ -75,11 +80,16 @@
         .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 13px; cursor: pointer; }
         .status-select:focus { outline: none; border-color: var(--ev-red); }
         
+        /* BOTTONI MODALE */
         .delete-btn { background-color: transparent; color: var(--text-light); border: none; cursor: pointer; font-size: 16px; font-weight: bold; padding: 5px 10px; }
         .delete-btn:hover { color: var(--ev-red); }
-        .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
-        .add-sub-btn:hover { background-color: var(--ev-red); }
-        .delete-macro-btn { background-color: var(--ev-white); color: var(--ev-red); border: 1px solid var(--ev-red); padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 15px; float: right; font-size: 12px;}
+        .add-sub-btn { background-color: var(--bg-light); color: var(--ev-black); border: 1px solid #ccc; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
+        .add-sub-btn:hover { background-color: #e0e0e0; }
+        
+        .save-modal-btn { background-color: #2E7D32; color: white; border: none; padding: 10px 20px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; float: right; margin-left: 10px; font-size: 14px;}
+        .save-modal-btn:hover { background-color: #1B5E20; }
+        
+        .delete-macro-btn { background-color: var(--ev-white); color: var(--ev-red); border: 1px solid var(--ev-red); padding: 8px 12px; border-radius: 3px; cursor: pointer; margin-top: 15px; float: right; font-size: 12px;}
         .delete-macro-btn:hover { background-color: var(--ev-red); color: var(--ev-white); }
     </style>
 </head>
@@ -137,6 +147,7 @@
         </div>
     </div>
 
+    <button class="save-global-btn" onclick="forceSave()" title="Salva tutte le modifiche su Google Sheets">💾 SALVA DATI</button>
     <button class="add-macro-btn" onclick="addNewMacroTask()" title="Aggiungi Nuovo Progetto">+</button>
 
     <div id="taskModal" class="modal">
@@ -172,14 +183,19 @@
                 </div>
             </div>
             
-            <div style="max-height: 45vh; overflow-y: auto;">
+            <div style="max-height: 40vh; overflow-y: auto;">
                 <table class="subtask-table">
                     <thead><tr><th width="35%">Sotto-Task</th><th width="15%">Status</th><th width="45%">Commento / Note</th><th width="5%"></th></tr></thead>
                     <tbody id="subtaskTableBody"></tbody>
                 </table>
             </div>
-            <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
-            <button class="delete-macro-btn" id="deleteMacroBtn">Elimina intero Progetto</button>
+            
+            <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
+                <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
+                
+                <button class="save-modal-btn" onclick="saveAndCloseModal()">💾 SALVA E CHIUDI</button>
+                <button class="delete-macro-btn" id="deleteMacroBtn">🗑️ Elimina Progetto</button>
+            </div>
         </div>
     </div>
 
@@ -201,8 +217,6 @@
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
-                
-                // Assicurati che ogni progetto abbia un dipartimento, altrimenti metti "Other"
                 data.forEach(p => { if(!p.department) p.department = "Other"; });
                 projectsData = data;
             } catch (error) { console.error("Errore:", error); alert("Errore connessione DB."); }
@@ -218,6 +232,12 @@
             setSyncStatus(false);
         }
 
+        // Tasto Salvataggio Globale (Nero)
+        function forceSave() { saveData(); }
+
+        // Tasto Salvataggio Modale (Verde)
+        function saveAndCloseModal() { saveData(); closeModal(); }
+
         document.addEventListener('DOMContentLoaded', () => { loadData(); });
 
         function renderBoard() {
@@ -225,14 +245,12 @@
             Object.values(lists).forEach(list => list.innerHTML = '');
             const counts = { backlog: 0, inprogress: 0, completed: 0 };
             
-            // Lettura dei filtri attivi
             const filterPrio = document.getElementById('filter-priority').value;
             const filterDept = document.getElementById('filter-department').value;
 
             ['backlog', 'inprogress', 'completed'].forEach(status => {
                 let columnTasks = projectsData.filter(p => p.status === status);
                 
-                // APPLICAZIONE DEI FILTRI
                 if (filterPrio !== 'All') columnTasks = columnTasks.filter(p => p.priority === filterPrio);
                 if (filterDept !== 'All') columnTasks = columnTasks.filter(p => p.department === filterDept);
 
@@ -262,8 +280,6 @@
             document.getElementById('count-backlog').innerText = counts.backlog;
             document.getElementById('count-inprogress').innerText = counts.inprogress;
             document.getElementById('count-completed').innerText = counts.completed;
-            
-            // Le statistiche mostrano i totali dei task VISIBILI (filtrati)
             document.getElementById('stat-total').innerText = counts.backlog + counts.inprogress + counts.completed;
             document.getElementById('stat-inprogress').innerText = counts.inprogress;
             document.getElementById('stat-completed').innerText = counts.completed;
@@ -275,6 +291,7 @@
             event.preventDefault();
             const id = parseInt(event.dataTransfer.getData("text/plain"));
             const project = projectsData.find(p => p.id === id);
+            // Salva su DB in automatico solo col drag&drop
             if (project && project.status !== newStatus) { project.status = newStatus; saveData(); }
         }
 
@@ -289,8 +306,9 @@
                 subtasks: [] 
             };
             projectsData.push(newProject);
-            saveData(); 
-            openModal(newId); // Apre subito per farti scrivere comodamente
+            // Non salvo subito su DB, così apri, compili e salvi col pulsante verde
+            openModal(newId); 
+            renderBoard();
         }
 
         function openModal(projectId) {
@@ -303,22 +321,34 @@
             
             renderSubTasksTable(project);
             
-            document.getElementById('addSubTaskBtn').onclick = () => { project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" }); saveData(); renderSubTasksTable(project); };
-            document.getElementById('deleteMacroBtn').onclick = () => { if(confirm("Eliminare intero Progetto?")) { projectsData = projectsData.filter(p => p.id !== projectId); saveData(); closeModal(); } };
+            document.getElementById('addSubTaskBtn').onclick = () => { 
+                project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" }); 
+                renderSubTasksTable(project); // Aggiorna solo la grafica, NON salva su DB
+            };
+            
+            document.getElementById('deleteMacroBtn').onclick = () => { 
+                if(confirm("Eliminare intero Progetto?")) { 
+                    projectsData = projectsData.filter(p => p.id !== projectId); 
+                    saveData(); 
+                    closeModal(); 
+                } 
+            };
+            
             document.getElementById('taskModal').style.display = 'block';
         }
 
+        // Funzioni modificate: ora aggiornano solo la memoria locale, senza salvare su Google Sheets ogni volta
         function updateProjectName(newName) {
             if (currentEditingProjectId && newName.trim() !== "") {
                 const project = projectsData.find(p => p.id === currentEditingProjectId);
-                if (project) { project.name = newName; saveData(); }
+                if (project) { project.name = newName; }
             }
         }
 
         function updateProjectField(field, newValue) { 
             if (currentEditingProjectId) { 
                 const project = projectsData.find(p => p.id === currentEditingProjectId); 
-                if (project) { project[field] = newValue; saveData(); } 
+                if (project) { project[field] = newValue; } 
             } 
         }
 
@@ -340,10 +370,29 @@
             });
         }
 
-        function updateSubTask(projectId, subIndex, field, newValue) { const project = projectsData.find(p => p.id === projectId); if (project && project.subtasks[subIndex]) { project.subtasks[subIndex][field] = newValue; saveData(); } }
-        function deleteSubTask(projectId, subIndex) { if(confirm("Eliminare questo sotto-task?")) { const project = projectsData.find(p => p.id === projectId); if (project) { project.subtasks.splice(subIndex, 1); saveData(); renderSubTasksTable(project); } } }
+        function updateSubTask(projectId, subIndex, field, newValue) { 
+            const project = projectsData.find(p => p.id === projectId); 
+            if (project && project.subtasks[subIndex]) { project.subtasks[subIndex][field] = newValue; } 
+        }
+
+        function deleteSubTask(projectId, subIndex) { 
+            if(confirm("Eliminare questo sotto-task?")) { 
+                const project = projectsData.find(p => p.id === projectId); 
+                if (project) { project.subtasks.splice(subIndex, 1); renderSubTasksTable(project); } 
+            } 
+        }
+
         function closeModal() { document.getElementById('taskModal').style.display = 'none'; currentEditingProjectId = null; }
-        window.onclick = function(e) { if(e.target == document.getElementById('taskModal')) closeModal(); }
+        
+        // Se l'utente clicca fuori, chiediamo se vuole chiudere (senza salvare per forza)
+        window.onclick = function(e) { 
+            let modal = document.getElementById('taskModal');
+            if(e.target == modal) {
+                if(confirm("Chiudere senza salvare le ultime modifiche? Premi 'Salva e Chiudi' se vuoi mantenere le modifiche.")) {
+                    closeModal();
+                }
+            } 
+        }
     </script>
 </body>
 </html>
