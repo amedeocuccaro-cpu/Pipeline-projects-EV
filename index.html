@@ -6,33 +6,25 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <title>EV Internal Pipeline</title>
     <style>
-        /* --- STILE ENGEL & VÖLKERS --- */
-        :root {
-            --ev-black: #111111; --ev-white: #FFFFFF; --ev-red: #CC0000;
-            --bg-light: #F9F9F9; --border-color: #EEEEEE; --text-dark: #333333; --text-light: #888888;
-        }
-
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--ev-white); margin: 0; padding: 0; padding-bottom: 80px; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; }
+        :root { --ev-black: #111111; --ev-white: #FFFFFF; --ev-red: #CC0000; --bg-light: #F9F9F9; --border-color: #EEEEEE; --text-dark: #333333; --text-light: #888888; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--ev-white); margin: 0; padding-bottom: 80px; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; }
         header { width: 100%; background-color: var(--ev-black); color: var(--ev-white); padding: 20px 0; text-align: center; border-bottom: 4px solid var(--ev-red); box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: relative; }
         .logo-placeholder { font-size: 24px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
         header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
-
+        
         #sync-status { position: absolute; top: 20px; right: 20px; background-color: #333; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; display: none; font-weight: bold; }
         .sync-active { display: block !important; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
 
-        /* --- NAVIGAZIONE IN BASSO (TAB) --- */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--ev-black); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); z-index: 1000; }
-        .nav-btn { flex: 1; background: transparent; color: var(--text-light); border: none; padding: 15px 0; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;}
+        .nav-btn { flex: 1; background: transparent; color: var(--text-light); border: none; padding: 15px 0; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
         .nav-btn:hover { color: var(--ev-white); background-color: #222; }
         .nav-btn.active { color: var(--ev-white); border-bottom: 4px solid var(--ev-red); background-color: #1a1a1a; }
         
-        /* Gestione Viste */
         .view-section { width: 100%; display: flex; flex-direction: column; align-items: center; display: none; }
         .view-section.active { display: flex; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Layout Standard per Kanban */
         .dashboard { display: flex; gap: 20px; margin: 30px 0; width: 90%; max-width: 1200px; justify-content: space-between; }
         .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px; flex: 1; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: var(--text-light); }
@@ -40,48 +32,40 @@
         .stat-card .value.red { color: var(--ev-red); }
 
         .filters-bar { background-color: var(--bg-light); padding: 15px 20px; border-radius: 4px; width: 90%; max-width: 1200px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
-        .filters-bar label { font-size: 14px; font-weight: bold; color: var(--ev-black); text-transform: uppercase; letter-spacing: 1px;}
         .filter-select { padding: 8px; border-radius: 3px; border: 1px solid #ccc; font-size: 14px; min-width: 150px; cursor: pointer; }
 
-        .board { display: flex; gap: 20px; width: 95%; max-width: 1600px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
-        .column { background-color: var(--bg-light); border-radius: 4px; flex: 1; min-width: 280px; padding: 15px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; transition: background-color 0.2s; }
+        .board { display: flex; gap: 25px; width: 95%; max-width: 1400px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
+        .column { background-color: var(--bg-light); border-radius: 4px; flex: 1; min-width: 300px; padding: 20px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; transition: background-color 0.2s; }
         .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; }
         .column.inprogress { border-top-color: var(--ev-red); }
         .column.completed { border-top-color: #333; }
-        .column.blocked { border-top-color: #FFB300; background-color: #fffaf0; }
-        
-        .column h2 { font-size: 15px; margin-top: 0; color: var(--ev-black); text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .column h2 { font-size: 16px; margin-top: 0; color: var(--ev-black); text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .task-count { font-size: 12px; background: #ddd; color: #555; padding: 2px 6px; border-radius: 10px; }
         .task-list { min-height: 300px; }
 
-        /* Task Cards */
         .task-card { background-color: var(--ev-white); padding: 15px; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: grab; border-left: 4px solid transparent; position: relative; }
         .task-card:active { cursor: grabbing; opacity: 0.6; transform: scale(0.98); }
         .task-card:hover { box-shadow: 0 5px 10px rgba(0,0,0,0.15); border-left-color: var(--ev-red); }
-        .task-card h3 { margin: 8px 0 0 0; font-size: 14px; color: var(--ev-black); font-weight: 600; pointer-events: none; line-height: 1.4;}
+        .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
         .priority-badge { display: inline-block; font-size: 10px; padding: 3px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; pointer-events: none; }
         .priority-alta { background-color: var(--ev-red); color: white; }
         .priority-media { background-color: #FFB300; color: black; }
         .priority-bassa { background-color: #E0E0E0; color: #333; }
-        
         .dept-badge { font-size: 10px; color: #666; background: #eee; padding: 3px 6px; border-radius: 3px; float: right; pointer-events: none; }
-        .owner-badge { font-size: 11px; font-weight: bold; color: var(--ev-white); background: var(--ev-black); padding: 4px 8px; border-radius: 15px; margin-bottom: 8px; display: inline-block; pointer-events: none;}
 
-        /* Bottoni */
         .add-macro-btn { position: fixed; bottom: 80px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
         .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
         .save-global-btn { position: fixed; bottom: 85px; left: 30px; background-color: var(--ev-black); color: var(--ev-white); border: none; border-radius: 30px; padding: 15px 25px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 90; transition: background 0.2s; letter-spacing: 1px;}
         .save-global-btn:hover { background-color: #333; transform: scale(1.05); }
 
-        /* Modale (Semplificata dal codice precedente) */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
-        .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 90%; max-width: 1000px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
+        .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 95%; max-width: 1200px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
         .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
         .close-btn:hover { color: var(--ev-black); }
         .project-meta { margin: 15px 0; padding: 15px; background: var(--bg-light); border-radius: 4px; border: 1px solid var(--border-color); display: flex; gap: 20px; align-items: center; }
-        .project-meta label { font-size: 12px; font-weight: bold; color: var(--text-dark); text-transform: uppercase; }
+        
         .subtask-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 12px; }
         .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 8px; }
@@ -89,6 +73,7 @@
         .edit-input:hover { border-color: #ccc; background-color: #f5f5f5; }
         .edit-input:focus { outline: none; border-color: var(--ev-red); background-color: #fff; }
         .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 13px; }
+        
         .delete-btn { background-color: transparent; color: var(--text-light); border: none; cursor: pointer; font-size: 16px; font-weight: bold; padding: 5px 10px; }
         .delete-btn:hover { color: var(--ev-red); }
         .add-sub-btn { background-color: var(--bg-light); color: var(--ev-black); border: 1px solid #ccc; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
@@ -106,164 +91,75 @@
 
     <div class="bottom-nav">
         <button id="nav-macro" class="nav-btn active" onclick="switchView('macro')">📁 MACRO PROGETTI</button>
-        <button id="nav-nl" class="nav-btn" onclick="switchView('newsletter')">📧 PROGETTO NEWSLETTER</button>
+        <button id="nav-newsletter" class="nav-btn" onclick="switchView('newsletter')">📧 PROGETTO NEWSLETTER</button>
     </div>
 
     <div id="view-macro" class="view-section active">
         <div class="dashboard">
-            <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
-            <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
-            <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
+            <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total-m">0</div></div>
+            <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress-m">0</div></div>
+            <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed-m">0</div></div>
         </div>
-
         <div class="filters-bar">
             <label>Filtra la vista:</label>
-            <select id="filter-priority" class="filter-select" onchange="renderMacroBoard()">
-                <option value="All">Tutte le Priorità</option>
-                <option value="Alta">🔴 Alta</option>
-                <option value="Media">🟡 Media</option>
-                <option value="Bassa">⚪ Bassa</option>
-            </select>
-            <select id="filter-department" class="filter-select" onchange="renderMacroBoard()">
-                <option value="All">Tutti i Dipartimenti</option>
-                <option value="HR">HR</option>
-                <option value="Sales">Sales</option>
-                <option value="Rent">Rent</option>
-                <option value="Sales administrative assistants">SAA</option>
-                <option value="Area manager">Area manager</option>
-                <option value="Finance">Finance</option>
-                <option value="Legal">Legal</option>
-                <option value="Recruiting">Recruiting</option>
-                <option value="On boarding">On boarding</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Other">Other</option>
-            </select>
+            <select id="filter-priority" class="filter-select" onchange="renderBoard()"><option value="All">Tutte le Priorità</option><option value="Alta">🔴 Alta</option><option value="Media">🟡 Media</option><option value="Bassa">⚪ Bassa</option></select>
+            <select id="filter-department" class="filter-select" onchange="renderBoard()"><option value="All">Tutti i Dipartimenti</option><option value="HR">HR</option><option value="Sales">Sales</option><option value="Rent">Rent</option><option value="Sales administrative assistants">SAA</option><option value="Area manager">Area manager</option><option value="Finance">Finance</option><option value="Legal">Legal</option><option value="Recruiting">Recruiting</option><option value="On boarding">On boarding</option><option value="Marketing">Marketing</option><option value="Other">Other</option></select>
         </div>
-
         <div class="board">
-            <div class="column backlog" ondragover="allowDrop(event)" ondrop="dropMacro(event, 'backlog')">
-                <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
-                <div class="task-list" id="list-backlog"></div>
-            </div>
-            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="dropMacro(event, 'inprogress')">
-                <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
-                <div class="task-list" id="list-inprogress"></div>
-            </div>
-            <div class="column completed" ondragover="allowDrop(event)" ondrop="dropMacro(event, 'completed')">
-                <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
-                <div class="task-list" id="list-completed"></div>
-            </div>
+            <div class="column backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')"><h2>Backlog <span class="task-count" id="count-backlog-m">0</span></h2><div class="task-list" id="list-backlog-m"></div></div>
+            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')"><h2>In Progress <span class="task-count" id="count-inprogress-m">0</span></h2><div class="task-list" id="list-inprogress-m"></div></div>
+            <div class="column completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')"><h2>Completed <span class="task-count" id="count-completed-m">0</span></h2><div class="task-list" id="list-completed-m"></div></div>
         </div>
-
-        <button class="save-global-btn" id="saveBtnMacro" onclick="forceSaveMacro()">💾 SALVA DB</button>
-        <button class="add-macro-btn" id="addBtnMacro" onclick="addNewMacroTask()">+</button>
     </div>
-
 
     <div id="view-newsletter" class="view-section">
-        <div class="dashboard" style="margin-top: 10px;">
-            <div style="width: 100%; text-align: center; margin-bottom: 20px;">
-                <h2 style="margin: 0; color: var(--ev-red); text-transform: uppercase;">Pipeline Operativa Newsletter</h2>
-                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">I 65 task operativi divisi per stato di avanzamento</p>
-            </div>
+        <div class="dashboard">
+            <div class="stat-card"><h3>Task NLP</h3><div class="value" id="stat-total-nl">0</div></div>
+            <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress-nl">0</div></div>
+            <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed-nl">0</div></div>
         </div>
-
         <div class="board">
-            <div class="column backlog" ondragover="allowDrop(event)" ondrop="dropNL(event, 'backlog')">
-                <h2>Da Iniziare <span class="task-count" id="count-nl-backlog">0</span></h2>
-                <div class="task-list" id="list-nl-backlog"></div>
-            </div>
-            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="dropNL(event, 'inprogress')">
-                <h2>In Corso <span class="task-count" id="count-nl-inprogress">0</span></h2>
-                <div class="task-list" id="list-nl-inprogress"></div>
-            </div>
-            <div class="column blocked" ondragover="allowDrop(event)" ondrop="dropNL(event, 'blocked')">
-                <h2>Fermo / Annullato <span class="task-count" id="count-nl-blocked">0</span></h2>
-                <div class="task-list" id="list-nl-blocked"></div>
-            </div>
-            <div class="column completed" ondragover="allowDrop(event)" ondrop="dropNL(event, 'completed')">
-                <h2>Completato <span class="task-count" id="count-nl-completed">0</span></h2>
-                <div class="task-list" id="list-nl-completed"></div>
-            </div>
+            <div class="column backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')"><h2>Backlog <span class="task-count" id="count-backlog-nl">0</span></h2><div class="task-list" id="list-backlog-nl"></div></div>
+            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')"><h2>In Progress <span class="task-count" id="count-inprogress-nl">0</span></h2><div class="task-list" id="list-inprogress-nl"></div></div>
+            <div class="column completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')"><h2>Completed <span class="task-count" id="count-completed-nl">0</span></h2><div class="task-list" id="list-completed-nl"></div></div>
         </div>
     </div>
+
+    <button class="save-global-btn" onclick="saveData()">💾 SALVA DB</button>
+    <button class="add-macro-btn" onclick="addNewProject()">+</button>
 
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <input type="text" id="modalTitleInput" class="edit-input" style="font-size: 24px; font-weight: bold; color: var(--ev-black); margin-bottom: 5px;" onchange="updateProjectName(this.value)">
+            <input type="text" id="modalTitleInput" class="edit-input" style="font-size: 24px; font-weight: bold; color: var(--ev-black); margin-bottom: 5px;" onchange="updateProjectField('name', this.value)">
             
-            <div class="project-meta">
-                <div>
-                    <label>Priorità:</label><br>
-                    <select id="modalPriority" class="status-select" onchange="updateProjectField('priority', this.value)">
-                        <option value="Alta">🔴 Alta</option>
-                        <option value="Media">🟡 Media</option>
-                        <option value="Bassa">⚪ Bassa</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Dipartimento:</label><br>
-                    <select id="modalDepartment" class="status-select" onchange="updateProjectField('department', this.value)">
-                        <option value="HR">HR</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Rent">Rent</option>
-                        <option value="Sales administrative assistants">SAA</option>
-                        <option value="Area manager">Area manager</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Legal">Legal</option>
-                        <option value="Recruiting">Recruiting</option>
-                        <option value="On boarding">On boarding</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
+            <div class="project-meta" id="macro-meta-fields">
+                <div><label>Priorità:</label><br><select id="modalPriority" class="status-select" onchange="updateProjectField('priority', this.value)"><option value="Alta">🔴 Alta</option><option value="Media">🟡 Media</option><option value="Bassa">⚪ Bassa</option></select></div>
+                <div><label>Dipartimento:</label><br><select id="modalDepartment" class="status-select" onchange="updateProjectField('department', this.value)"><option value="HR">HR</option><option value="Sales">Sales</option><option value="Rent">Rent</option><option value="Sales administrative assistants">SAA</option><option value="Area manager">Area manager</option><option value="Finance">Finance</option><option value="Legal">Legal</option><option value="Recruiting">Recruiting</option><option value="On boarding">On boarding</option><option value="Marketing">Marketing</option><option value="Other">Other</option></select></div>
             </div>
             
             <div style="max-height: 40vh; overflow-y: auto;">
                 <table class="subtask-table">
-                    <thead><tr><th width="35%">Sotto-Task</th><th width="15%">Status</th><th width="45%">Commento / Note</th><th width="5%"></th></tr></thead>
+                    <thead><tr><th width="30%">Sotto-Task</th><th width="15%">Owner</th><th width="15%">Status</th><th width="35%">Commento / Note</th><th width="5%"></th></tr></thead>
                     <tbody id="subtaskTableBody"></tbody>
                 </table>
             </div>
             
             <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
-                <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
+                <button class="add-sub-btn" id="addSubTaskBtn" onclick="addSubtask()">+ Aggiungi Sotto-Task</button>
                 <button class="save-modal-btn" onclick="saveAndCloseModal()">💾 SALVA E CHIUDI</button>
-                <button class="delete-macro-btn" id="deleteMacroBtn">🗑️ Elimina Progetto</button>
+                <button class="delete-macro-btn" onclick="deleteCurrentProject()">🗑️ Elimina Progetto</button>
             </div>
         </div>
     </div>
 
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqqTFJrPmqMxoWDaQALpX_GSg2a2VJg-cY4C-S51tVuo3zgDj047p61lwh9z8f4EZ5pQ/exec";
-
-        let projectsData = []; // Dati DB Macro
-        let nlData = []; // Dati Locali Newsletter
         
-        const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
+        let projectsData = [];
+        let currentView = 'macro'; // o 'newsletter'
         let currentEditingProjectId = null;
-
-        // --- SISTEMA NAVIGAZIONE TAB ---
-        function switchView(viewName) {
-            document.getElementById('view-macro').classList.remove('active');
-            document.getElementById('view-newsletter').classList.remove('active');
-            document.getElementById('nav-macro').classList.remove('active');
-            document.getElementById('nav-nl').classList.remove('active');
-
-            if (viewName === 'macro') {
-                document.getElementById('view-macro').classList.add('active');
-                document.getElementById('nav-macro').classList.add('active');
-                document.getElementById('saveBtnMacro').style.display = 'block';
-                document.getElementById('addBtnMacro').style.display = 'block';
-            } else {
-                document.getElementById('view-newsletter').classList.add('active');
-                document.getElementById('nav-nl').classList.add('active');
-                // Nascondo i tasti globali nella vista NL per ora
-                document.getElementById('saveBtnMacro').style.display = 'none';
-                document.getElementById('addBtnMacro').style.display = 'none';
-            }
-        }
+        const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
 
         function setSyncStatus(active, text = "🔄 Sincronizzazione...") {
             const el = document.getElementById('sync-status');
@@ -271,43 +167,145 @@
             if(active) el.classList.add('sync-active'); else el.classList.remove('sync-active');
         }
 
-        // ==========================================
-        // LOGICA MACRO PROGETTI (Google Sheets)
-        // ==========================================
-        async function loadMacroData() {
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + view).classList.add('active');
+            document.getElementById('nav-' + view).classList.add('active');
+            renderBoard();
+        }
+
+        // --- I TUOI DATI EXCEL DELLA NEWSLETTER TRADOTTI IN CODICE ---
+        const initialNLData = [
+            { id: 901, name: "1. NL Matching Immobili", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
+                {title: "Sistemazione query per adattarla ai MC Italia", owner: "Orfini", status: "Completato", comment: ""},
+                {title: "Contatto con Spagna per verificare se le email contengono immobili...", owner: "CRM + MKT", status: "Completato", comment: ""},
+                {title: "Allineamento parametri UTM da inserire nella NL", owner: "CRM + MKT", status: "Completato", comment: ""},
+                {title: "Verifica UTM e conferma definizione + contenuti", owner: "Orfini", status: "Completato", comment: ""},
+                {title: "Test invio immobili multipli vs singoli tramite NL", owner: "CRM + MKT", status: "Completato", comment: ""},
+                {title: "Comunicazione agli agenti sull'avvio NL", owner: "CRM + MKT", status: "Da Iniziare", comment: ""},
+                {title: "Adattare query agli scaduti + filtro lead auto generated", owner: "Orfini", status: "Da Iniziare", comment: ""},
+                {title: "Training optimizely", owner: "CRM + MKT", status: "Completato", comment: ""},
+                {title: "Escludere immobili commerciali Includi solo lead_auto_generated", owner: "Orfini", status: "Completato", comment: ""},
+                {title: "Esperimenti Hyperfields optimizely", owner: "CRM + MKT", status: "Completato", comment: ""},
+                {title: "Organizzare riunione per discutere come avviare NL", owner: "Zaccardo", status: "In corso", comment: ""},
+                {title: "Esclusione stesso immobile a prescindere del cliente", owner: "Orfini", status: "Completato", comment: ""}
+            ]},
+            { id: 902, name: "2. NL Matching Inverso", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
+                {title: "Matching inverso via NL a partire dall'immobile", owner: "Orfini", status: "Completato", comment: ""},
+                {title: "Selezione immobili dal PM per test", owner: "Orfini", status: "Completato", comment: ""},
+                {title: "Spiegazione PM a Marketing", owner: "Cuccaro", status: "Completato", comment: ""},
+                {title: "Verifica fattibilità invio matching inverso", owner: "Orfini", status: "Bloccato", comment: ""},
+                {title: "Spiegazione processo ai Sales", owner: "Cuccaro", status: "In corso", comment: ""},
+                {title: "Primo esperimento solo con lead attivi", owner: "CRM + MKT", status: "Bloccato", comment: ""},
+                {title: "Decidere se procedere da NL o tramite AM", owner: "CRM", status: "Completato", comment: ""},
+                {title: "Organizzare riunione", owner: "CRM + MKT", status: "Da Iniziare", comment: ""},
+                {title: "Criteri selezione portfolio management", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Selezioni immobili dal PM AREA MANAGERS", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Correggere immobili senza flag", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Raccolta e consegna feedback", owner: "MKT", status: "In corso", comment: ""}
+            ]},
+            { id: 903, name: "3. Cluster clienti venduto con E&V", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
+                {title: "Estrazione clienti stato Chiusi da EV gen-giu", owner: "Cuccaro", status: "Bloccato", comment: ""},
+                {title: "Estrazione clienti mandate from ultimi 24 mesi status Sold", owner: "Cuccaro", status: "Completato", comment: ""},
+                {title: "Condivisione file con AM e SAA per esclusioni legali", owner: "Orfini", status: "Bloccato", comment: ""},
+                {title: "Controllo dati KYC in CRM", owner: "Cuccaro", status: "Bloccato", comment: ""},
+                {title: "Controllo legal GDPR marketing per chi ha avuto incarico ultimi 24m", owner: "Zaccardo", status: "Completato", comment: ""},
+                {title: "Richiesta consensi GDPR per NL e MKT da EVA diretto", owner: "Cuccaro", status: "In corso", comment: ""},
+                {title: "Comunicazione del tech aggiunta Newsletter", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Processo di comunicazione ai clienti per casistica inserimento in NL", owner: "CRM + MKT", status: "In corso", comment: ""}
+            ]},
+            { id: 904, name: "4. Cluster clienti VIP", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
+                {title: "Pulizia lista clienti taggati VIP", owner: "CRM", status: "Da Iniziare", comment: ""},
+                {title: "Definizione criteri cliente VIP", owner: "MKT", status: "Completato", comment: ""},
+                {title: "Estrazione clienti budget >= 1M", owner: "Cuccaro", status: "Bloccato", comment: ""},
+                {title: "Procedura per flaggare VIP", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Comunicazione avvio e chiusura", owner: "CRM + MKT", status: "Da Iniziare", comment: ""},
+                {title: "Estrazione clienti budget team Boellis", owner: "Cuccaro", status: "In corso", comment: ""},
+                {title: "Lista multiproprietari con incarico", owner: "Cuccaro", status: "In corso", comment: ""},
+                {title: "Scegliere come ottenere consenso VIP", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Integrare consenso offline online", owner: "MKT", status: "In corso", comment: ""}
+            ]},
+            { id: 905, name: "5. Nurturing Seller Leads", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
+                {title: "Estrazione clienti unresponsive", owner: "CRM", status: "Bloccato", comment: ""},
+                {title: "Avvio prima newsletter tramite EVA-OPTIVO", owner: "CRM + MKT", status: "Bloccato", comment: ""},
+                {title: "Allineamento Legal; mandato per conferma", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Sollecitare legal footer CRM", owner: "CRM", status: "In corso", comment: ""}
+            ]},
+            { id: 906, name: "6. Criticità / Note", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
+                {title: "Tema legale: email CEO per blocchi tecnici", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Possibile escalation Amburgo", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Finalizzare dati pie pagina EVA consensi GDPR", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Richiesta intenti con NL applicabile sito", owner: "MKT", status: "In corso", comment: ""},
+                {title: "Applicare richiesta intenti NL sul CRM?", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Automazione iscrizione NL da sito con flag", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Leads dal sito con GDPR NL automatico", owner: "CRM + MKT", status: "In corso", comment: ""},
+                {title: "Flag leads 6 mesi fa auto generati", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Contatta Donovan per ID NL shop", owner: "CRM", status: "In corso", comment: ""},
+                {title: "Test NL matching a maggio", owner: "CRM", status: "In corso", comment: ""}
+            ]}
+        ];
+
+        async function loadData() {
             setSyncStatus(true, "⬇️ Caricamento DB...");
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
-                data.forEach(p => { if(!p.department) p.department = "Other"; });
+                
+                // Seleziona la Categoria corretta (default Macro)
+                data.forEach(p => { 
+                    if(!p.department) p.department = "Other"; 
+                    if(!p.category) p.category = "Macro"; 
+                });
                 projectsData = data;
-            } catch (error) { console.error("Errore:", error); }
-            renderMacroBoard();
+
+                // Se non ci sono progetti Newsletter, INIETTA automaticamente i dati excel!
+                if(projectsData.filter(p => p.category === 'Newsletter').length === 0) {
+                    projectsData = projectsData.concat(initialNLData);
+                    saveData(); // Li salva subito nel DB per sempre
+                }
+
+            } catch (error) { console.error("Errore DB:", error); }
+            renderBoard();
             setSyncStatus(false);
         }
 
-        async function saveMacroData() {
-            renderMacroBoard(); 
-            setSyncStatus(true, "⬆️ Salvataggio DB...");
+        async function saveData() {
+            renderBoard(); 
+            setSyncStatus(true, "⬆️ Salvataggio...");
             try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(projectsData) }); } 
             catch (error) { console.error("Errore:", error); }
             setSyncStatus(false);
         }
 
-        function forceSaveMacro() { saveMacroData(); }
+        document.addEventListener('DOMContentLoaded', () => { loadData(); });
 
-        function renderMacroBoard() {
-            const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
+        function renderBoard() {
+            // Seleziona dove scrivere in base alla view corrente
+            const suffix = currentView === 'macro' ? '-m' : '-nl';
+            const lists = { 
+                backlog: document.getElementById('list-backlog' + suffix), 
+                inprogress: document.getElementById('list-inprogress' + suffix), 
+                completed: document.getElementById('list-completed' + suffix) 
+            };
+            
             Object.values(lists).forEach(list => list.innerHTML = '');
             const counts = { backlog: 0, inprogress: 0, completed: 0 };
             
-            const filterPrio = document.getElementById('filter-priority').value;
-            const filterDept = document.getElementById('filter-department').value;
+            // Filtra solo i progetti della View corrente
+            let viewProjects = projectsData.filter(p => p.category === (currentView === 'macro' ? 'Macro' : 'Newsletter'));
+
+            // Applica filtri solo nella vista Macro
+            if (currentView === 'macro') {
+                const filterPrio = document.getElementById('filter-priority').value;
+                const filterDept = document.getElementById('filter-department').value;
+                if (filterPrio !== 'All') viewProjects = viewProjects.filter(p => p.priority === filterPrio);
+                if (filterDept !== 'All') viewProjects = viewProjects.filter(p => p.department === filterDept);
+            }
 
             ['backlog', 'inprogress', 'completed'].forEach(status => {
-                let columnTasks = projectsData.filter(p => p.status === status);
-                if (filterPrio !== 'All') columnTasks = columnTasks.filter(p => p.priority === filterPrio);
-                if (filterDept !== 'All') columnTasks = columnTasks.filter(p => p.department === filterDept);
+                let columnTasks = viewProjects.filter(p => p.status === status);
                 columnTasks.sort((a, b) => priorityScore[a.priority] - priorityScore[b.priority]);
                 counts[status] = columnTasks.length;
 
@@ -315,207 +313,104 @@
                     const card = document.createElement('div');
                     card.className = 'task-card';
                     card.setAttribute('draggable', 'true');
-                    card.ondragstart = (e) => { e.dataTransfer.setData("text/plain", "macro_" + project.id); };
+                    card.ondragstart = (e) => e.dataTransfer.setData("text/plain", project.id);
                     card.ondblclick = () => openModal(project.id);
-                    const prioClass = 'priority-' + project.priority.toLowerCase();
-                    const dept = project.department || "Other";
-                    card.innerHTML = `<div class="priority-badge ${prioClass}">Priorità ${project.priority}</div><div class="dept-badge">${dept}</div><h3>${project.name}</h3><p>${project.subtasks.length} sub-tasks</p>`;
-                    lists[status].appendChild(card);
-                });
-            });
-            document.getElementById('count-backlog').innerText = counts.backlog;
-            document.getElementById('count-inprogress').innerText = counts.inprogress;
-            document.getElementById('count-completed').innerText = counts.completed;
-            document.getElementById('stat-total').innerText = counts.backlog + counts.inprogress + counts.completed;
-            document.getElementById('stat-inprogress').innerText = counts.inprogress;
-            document.getElementById('stat-completed').innerText = counts.completed;
-        }
-
-        function dropMacro(event, newStatus) {
-            event.preventDefault();
-            const rawId = event.dataTransfer.getData("text/plain");
-            if(!rawId.startsWith("macro_")) return; // Protezione drag incrociato
-            const id = parseInt(rawId.split("_")[1]);
-            const project = projectsData.find(p => p.id === id);
-            if (project && project.status !== newStatus) { project.status = newStatus; saveMacroData(); }
-        }
-
-        // ==========================================
-        // LOGICA NEWSLETTER (Memoria Locale con pre-caricamento 65 task)
-        // ==========================================
-        function loadNLData() {
-            const localData = localStorage.getItem('ev_nl_data');
-            if (localData) {
-                nlData = JSON.parse(localData);
-            } else {
-                // IL MEGA DUMP DEI TUOI DATI EXCEL
-                nlData = [
-                    { id: 201, title: "Sistemazione query per adattarla ai MC Italia", owner: "Orfini", status: "completed" },
-                    { id: 202, title: "Matching inverso via NL a partire dall’immobile...", owner: "Orfini", status: "completed" },
-                    { id: 203, title: "Estrazione clienti con stato 'Chiusi da EV' tra gennaio–giugno", owner: "Cuccaro", "status": "blocked" },
-                    { id: 204, title: "Pulizia lista clienti attualmente taggati come VIP", owner: "CRM", status: "backlog" },
-                    { id: 205, title: "Estrazione clienti collegati a EVA classificati come unresponsive", owner: "CRM", status: "blocked" },
-                    { id: 206, title: "Tema legale: email al CEO da Cuccaro/Zaccardo per spiegare blocchi", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 207, title: "Contatto con Spagna per verificare layout email immobili", owner: "CRM + MKT", status: "completed" },
-                    { id: 208, title: "Selezione immobili dal file Portfolio Management per test", owner: "Orfini", status: "completed" },
-                    { id: 209, title: "Estrazione clienti con mandate from ultimi 24 mesi e status Sold", owner: "Cuccaro", status: "completed" },
-                    { id: 210, title: "Definizione criteri cliente VIP", owner: "MKT", status: "completed" },
-                    { id: 211, title: "Avvio prima newsletter tramite EVA–OPTIVO", owner: "CRM + MKT", status: "blocked" },
-                    { id: 212, title: "Possibile escalation ad Amburgo per risoluzione problemi tecnici", owner: "CRM", status: "inprogress" },
-                    { id: 213, title: "Allineamento parametri UTM da inserire nella NL", owner: "CRM + MKT", status: "completed" },
-                    { id: 214, title: "Spiegazione Portfolio Management a Marketing", owner: "Cuccaro", status: "completed" },
-                    { id: 215, title: "Chiarimenti con SAA su mancanza dati KYC", owner: "Cuccaro", status: "completed" },
-                    { id: 216, title: "Estrazione clienti con budget >= 1M", owner: "Cuccaro", status: "blocked" },
-                    { id: 217, title: "Allineamento con Legal e chiarimenti; mandato inviato", owner: "CRM", status: "inprogress" },
-                    { id: 218, title: "Finalizzare dati pie di pagina EVA per inviare consensi GDPR", owner: "CRM", status: "inprogress" },
-                    { id: 219, title: "Verifica UTM e conferma definizione + contenuti", owner: "Orfini", status: "completed" },
-                    { id: 220, title: "Verifica fattibilità di invio matching inverso", owner: "Orfini", status: "blocked" },
-                    { id: 221, title: "Comunicazione ai SAA e Area Manager sull’iniziativa", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 222, title: "Procedura per flaggare correttamente i VIP", owner: "CRM", status: "inprogress" },
-                    { id: 223, title: "Sollecitare legal per i footer per il CRM", owner: "CRM", status: "inprogress" },
-                    { id: 224, title: "Richiesta intenti con NL applicabile sul sito", owner: "MKT", status: "inprogress" },
-                    { id: 225, title: "Test invio immobili multipli vs singoli tramite NL", owner: "CRM + MKT", status: "completed" },
-                    { id: 226, title: "Spiegazione processo ai Sales", owner: "Cuccaro", status: "inprogress" },
-                    { id: 227, title: "Filtro clienti effettivi per team per evitare rischi", owner: "CRM", status: "blocked" },
-                    { id: 228, title: "Comunicazione avvio e chiusura procedura con check", owner: "CRM + MKT", status: "backlog" },
-                    { id: 229, title: "Applicare la richiesta intenti NL sul CRM?", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 230, title: "Comunicazione agli agenti sull’avvio NL", owner: "CRM + MKT", status: "backlog" },
-                    { id: 231, title: "Primo esperimento solo con lead attivi", owner: "CRM + MKT", status: "blocked" },
-                    { id: 232, title: "Spiegazione procedura ai Sales Director", owner: "Cuccaro", status: "backlog" },
-                    { id: 233, title: "Estrazione clienti con budget in base al team Boellis", owner: "Cuccaro", status: "inprogress" },
-                    { id: 234, title: "Automazione iscrizione NL da sito con flag MKT", owner: "CRM", status: "inprogress" },
-                    { id: 235, title: "Adattare query agli scaduti + filtro auto generated", owner: "Orfini", status: "backlog" },
-                    { id: 236, title: "Decidere se procedere da NL o Area Manager", owner: "CRM", status: "completed" },
-                    { id: 237, title: "Condivisione file con AM e SAA per esclusioni", owner: "Orfini", status: "blocked" },
-                    { id: 238, title: "Lista multiproprietari con incarico dato", owner: "Cuccaro", status: "inprogress" },
-                    { id: 239, title: "Leads dal sito con GDPR NL automatico", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 240, title: "Training optimizely", owner: "CRM + MKT", status: "completed" },
-                    { id: 241, title: "Organizzare riunione per avviare NL", owner: "CRM + MKT", status: "backlog" },
-                    { id: 242, title: "Controllo dati KYC in CRM", owner: "Cuccaro", status: "blocked" },
-                    { id: 243, title: "Come ottenere il consenso VIP, comunicazione ad HOC?", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 244, title: "Flag leads di 6 mesi fa auto generati", owner: "CRM", status: "inprogress" },
-                    { id: 245, title: "Escludere immobili commerciali (solo lead_auto_gen)", owner: "Orfini", status: "completed" },
-                    { id: 246, title: "Criteri di selezione portfolio management", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 247, title: "Controllo legal GDPR per incarichi ultimi 24 mesi", owner: "Zaccardo", status: "completed" },
-                    { id: 248, title: "Integrare consenso VIP offline e online", owner: "MKT", status: "inprogress" },
-                    { id: 249, title: "Contatta Donovan per ID NL per shop", owner: "CRM", status: "inprogress" },
-                    { id: 250, title: "Esperimenti Hyperfields optimizely", owner: "CRM + MKT", status: "completed" },
-                    { id: 251, title: "Selezioni immobili da PM AREA MANAGERS", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 252, title: "Richiesta consensi GDPR NL/MKT da EVA", owner: "Cuccaro", status: "inprogress" },
-                    { id: 253, title: "Test NL matching a maggio", owner: "CRM", status: "inprogress" },
-                    { id: 254, title: "Organizzare riunione avvio NL (Zaccardo)", owner: "Zaccardo", status: "inprogress" },
-                    { id: 255, title: "Correggere immobili senza flag", owner: "CRM", status: "inprogress" },
-                    { id: 256, title: "Comunicazione tech aggiunta Newsletter", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 257, title: "Esclusione stesso immobile a prescindere dal cliente", owner: "Orfini", status: "completed" },
-                    { id: 258, title: "Raccolta feedback NL matching inverso", owner: "MKT", status: "inprogress" },
-                    { id: 259, title: "Processo comunicazione clienti inserimento in NL", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 260, title: "Escludere locali commerciali (Orfini)", owner: "Orfini", status: "completed" },
-                    { id: 261, title: "Info con Sales director parametri Exposè PM", owner: "CRM + MKT", status: "inprogress" },
-                    { id: 262, title: "Consenso offline da aggiungere documenti mediazione", owner: "Zaccardo", status: "inprogress" },
-                    { id: 263, title: "Includere solamente ultimo immobile attivato", owner: "Orfini", status: "completed" },
-                    { id: 264, title: "Processo inserimento GDPR in EVA per SAA", owner: "Cuccaro", status: "inprogress" },
-                    { id: 265, title: "Ipotesi recupero massivo clienti incarico rolling 24m", owner: "CRM + MKT", status: "inprogress" }
-                ];
-                saveNLData();
-            }
-            renderNLBoard();
-        }
-
-        function saveNLData() { localStorage.setItem('ev_nl_data', JSON.stringify(nlData)); renderNLBoard(); }
-
-        function renderNLBoard() {
-            const lists = { backlog: document.getElementById('list-nl-backlog'), inprogress: document.getElementById('list-nl-inprogress'), completed: document.getElementById('list-nl-completed'), blocked: document.getElementById('list-nl-blocked') };
-            Object.values(lists).forEach(list => list.innerHTML = '');
-            const counts = { backlog: 0, inprogress: 0, completed: 0, blocked: 0 };
-            
-            ['backlog', 'inprogress', 'blocked', 'completed'].forEach(status => {
-                let columnTasks = nlData.filter(t => t.status === status);
-                counts[status] = columnTasks.length;
-
-                columnTasks.forEach(task => {
-                    const card = document.createElement('div');
-                    card.className = 'task-card';
-                    card.setAttribute('draggable', 'true');
-                    card.ondragstart = (e) => { e.dataTransfer.setData("text/plain", "nl_" + task.id); };
                     
-                    let ownerColor = "#333";
-                    if(task.owner.includes("Orfini")) ownerColor = "#00529B";
-                    if(task.owner.includes("Cuccaro")) ownerColor = "#4A148C";
-                    if(task.owner.includes("MKT")) ownerColor = "#E65100";
-                    if(task.owner.includes("CRM")) ownerColor = "#004D40";
-                    
-                    card.innerHTML = `
-                        <div class="owner-badge" style="background:${ownerColor}">${task.owner}</div>
-                        <h3>${task.title}</h3>
-                    `;
+                    if(currentView === 'macro') {
+                        const prioClass = 'priority-' + project.priority.toLowerCase();
+                        card.innerHTML = `<div class="priority-badge ${prioClass}">Priorità ${project.priority}</div><div class="dept-badge">${project.department}</div><h3>${project.name}</h3><p>${project.subtasks.length} sub-tasks</p>`;
+                    } else {
+                        // Vista Newsletter: più pulita
+                        card.innerHTML = `<h3>${project.name}</h3><p>📌 ${project.subtasks.length} task collegati</p>`;
+                    }
                     lists[status].appendChild(card);
                 });
             });
 
-            document.getElementById('count-nl-backlog').innerText = counts.backlog;
-            document.getElementById('count-nl-inprogress').innerText = counts.inprogress;
-            document.getElementById('count-nl-completed').innerText = counts.completed;
-            document.getElementById('count-nl-blocked').innerText = counts.blocked;
-        }
-
-        function dropNL(event, newStatus) {
-            event.preventDefault();
-            const rawId = event.dataTransfer.getData("text/plain");
-            if(!rawId.startsWith("nl_")) return; // Protezione drag incrociato
-            const id = parseInt(rawId.split("_")[1]);
-            const task = nlData.find(t => t.id === id);
-            if (task && task.status !== newStatus) { task.status = newStatus; saveNLData(); }
+            document.getElementById('count-backlog' + suffix).innerText = counts.backlog;
+            document.getElementById('count-inprogress' + suffix).innerText = counts.inprogress;
+            document.getElementById('count-completed' + suffix).innerText = counts.completed;
+            document.getElementById('stat-total' + suffix).innerText = counts.backlog + counts.inprogress + counts.completed;
+            document.getElementById('stat-inprogress' + suffix).innerText = counts.inprogress;
+            document.getElementById('stat-completed' + suffix).innerText = counts.completed;
         }
 
         function allowDrop(event) { event.preventDefault(); }
+        function dragStart(event, id) { event.dataTransfer.setData("text/plain", id); }
+        function drop(event, newStatus) {
+            event.preventDefault();
+            const id = parseInt(event.dataTransfer.getData("text/plain"));
+            const project = projectsData.find(p => p.id === id);
+            if (project && project.status !== newStatus) { project.status = newStatus; saveData(); }
+        }
 
-
-        // ==========================================
-        // GESTIONE MODALE (Solo per i Macro Progetti per ora)
-        // ==========================================
-        function addNewMacroTask() {
+        function addNewProject() {
             const newId = Date.now();
-            projectsData.push({ id: newId, name: "Nuovo Progetto", status: "backlog", priority: "Media", department: "Other", subtasks: [] });
-            openModal(newId); renderMacroBoard();
+            projectsData.push({ 
+                id: newId, name: "Nuovo Progetto", status: "backlog", priority: "Media", 
+                department: "Other", category: currentView === 'macro' ? 'Macro' : 'Newsletter', subtasks: [] 
+            });
+            openModal(newId); renderBoard();
         }
 
         function openModal(projectId) {
             currentEditingProjectId = projectId;
             const project = projectsData.find(p => p.id === projectId);
+            
             document.getElementById('modalTitleInput').value = project.name;
-            document.getElementById('modalPriority').value = project.priority;
-            document.getElementById('modalDepartment').value = project.department || "Other";
+            
+            if(project.category === 'Newsletter') {
+                document.getElementById('macro-meta-fields').style.display = 'none';
+            } else {
+                document.getElementById('macro-meta-fields').style.display = 'flex';
+                document.getElementById('modalPriority').value = project.priority;
+                document.getElementById('modalDepartment').value = project.department;
+            }
+            
             renderSubTasksTable(project);
-            document.getElementById('addSubTaskBtn').onclick = () => { project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" }); renderSubTasksTable(project); };
-            document.getElementById('deleteMacroBtn').onclick = () => { if(confirm("Eliminare intero Progetto?")) { projectsData = projectsData.filter(p => p.id !== projectId); saveMacroData(); closeModal(); } };
             document.getElementById('taskModal').style.display = 'block';
         }
-        function updateProjectName(newName) { if (currentEditingProjectId && newName.trim() !== "") { const project = projectsData.find(p => p.id === currentEditingProjectId); if (project) { project.name = newName; } } }
-        function updateProjectField(field, newValue) { if (currentEditingProjectId) { const project = projectsData.find(p => p.id === currentEditingProjectId); if (project) { project[field] = newValue; } } }
+
+        function updateProjectField(field, newValue) {
+            if (currentEditingProjectId) {
+                const project = projectsData.find(p => p.id === currentEditingProjectId);
+                if (project) { project[field] = newValue; }
+            }
+        }
+
         function renderSubTasksTable(project) {
             const tbody = document.getElementById('subtaskTableBody'); tbody.innerHTML = '';
             project.subtasks.forEach((sub, index) => { 
                 tbody.innerHTML += `<tr>
                     <td><input type="text" class="edit-input" value="${sub.title}" onchange="updateSubTask(${project.id}, ${index}, 'title', this.value)"></td>
+                    <td><input type="text" class="edit-input" placeholder="Owner" value="${sub.owner || ''}" onchange="updateSubTask(${project.id}, ${index}, 'owner', this.value)" style="width: 80px; font-weight:bold; color:#00529B;"></td>
                     <td><select class="status-select" onchange="updateSubTask(${project.id}, ${index}, 'status', this.value)">
-                        <option value="Da Iniziare" ${sub.status === 'Da Iniziare' ? 'selected' : ''}>Da Iniziare</option><option value="In corso" ${sub.status === 'In corso' ? 'selected' : ''}>In corso</option><option value="Completato" ${sub.status === 'Completato' ? 'selected' : ''}>Completato</option><option value="Bloccato" ${sub.status === 'Bloccato' ? 'selected' : ''}>Bloccato</option>
+                        <option value="Da Iniziare" ${sub.status === 'Da Iniziare' ? 'selected' : ''}>Da Iniziare</option>
+                        <option value="In corso" ${sub.status === 'In corso' ? 'selected' : ''}>In corso</option>
+                        <option value="Completato" ${sub.status === 'Completato' ? 'selected' : ''}>Completato</option>
+                        <option value="Bloccato" ${sub.status === 'Bloccato' ? 'selected' : ''}>Bloccato</option>
                     </select></td>
-                    <td><input type="text" class="edit-input" value="${sub.comment}" placeholder="Note..." onchange="updateSubTask(${project.id}, ${index}, 'comment', this.value)"></td>
+                    <td><input type="text" class="edit-input" value="${sub.comment || ''}" placeholder="Note..." onchange="updateSubTask(${project.id}, ${index}, 'comment', this.value)"></td>
                     <td><button class="delete-btn" onclick="deleteSubTask(${project.id}, ${index})">✕</button></td>
                 </tr>`; 
             });
         }
+
+        function addSubtask() {
+            const project = projectsData.find(p => p.id === currentEditingProjectId);
+            if(project) { project.subtasks.push({ title: "Nuovo Task...", owner: "", status: "Da Iniziare", comment: "" }); renderSubTasksTable(project); }
+        }
+
         function updateSubTask(projectId, subIndex, field, newValue) { const project = projectsData.find(p => p.id === projectId); if (project && project.subtasks[subIndex]) { project.subtasks[subIndex][field] = newValue; } }
-        function deleteSubTask(projectId, subIndex) { if(confirm("Eliminare questo sotto-task?")) { const project = projectsData.find(p => p.id === projectId); if (project) { project.subtasks.splice(subIndex, 1); renderSubTasksTable(project); } } }
-        function saveAndCloseModal() { saveMacroData(); closeModal(); }
+        function deleteSubTask(projectId, subIndex) { if(confirm("Eliminare?")) { const project = projectsData.find(p => p.id === projectId); if (project) { project.subtasks.splice(subIndex, 1); renderSubTasksTable(project); } } }
+        function deleteCurrentProject() { if(confirm("Eliminare intero Progetto?")) { projectsData = projectsData.filter(p => p.id !== currentEditingProjectId); saveData(); closeModal(); } }
+        function saveAndCloseModal() { saveData(); closeModal(); }
         function closeModal() { document.getElementById('taskModal').style.display = 'none'; currentEditingProjectId = null; }
         
-        // Avvio Iniziale
-        document.addEventListener('DOMContentLoaded', () => { 
-            loadMacroData(); 
-            loadNLData(); 
-        });
-
+        window.onclick = function(e) { 
+            let modal = document.getElementById('taskModal');
+            if(e.target == modal) { if(confirm("Chiudere? Premi 'Salva e Chiudi' per mantenere le modifiche.")) { closeModal(); } } 
+        }
     </script>
 </body>
 </html>
