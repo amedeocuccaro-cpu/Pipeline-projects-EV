@@ -12,7 +12,7 @@
             --bg-light: #F9F9F9; --border-color: #EEEEEE; --text-dark: #333333; --text-light: #888888;
         }
 
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--ev-white); margin: 0; padding: 0; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--ev-white); margin: 0; padding: 0; padding-bottom: 80px; color: var(--text-dark); display: flex; flex-direction: column; align-items: center; }
         header { width: 100%; background-color: var(--ev-black); color: var(--ev-white); padding: 20px 0; text-align: center; border-bottom: 4px solid var(--ev-red); box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: relative; }
         .logo-placeholder { font-size: 24px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
         header h1 { margin: 0; font-size: 18px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
@@ -21,76 +21,79 @@
         .sync-active { display: block !important; animation: pulse 1s infinite alternate; }
         @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
 
+        /* --- NAVIGAZIONE IN BASSO (TAB) --- */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--ev-black); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); z-index: 1000; }
+        .nav-btn { flex: 1; background: transparent; color: var(--text-light); border: none; padding: 15px 0; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;}
+        .nav-btn:hover { color: var(--ev-white); background-color: #222; }
+        .nav-btn.active { color: var(--ev-white); border-bottom: 4px solid var(--ev-red); background-color: #1a1a1a; }
+        
+        /* Gestione Viste */
+        .view-section { width: 100%; display: flex; flex-direction: column; align-items: center; display: none; }
+        .view-section.active { display: flex; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Layout Standard per Kanban */
         .dashboard { display: flex; gap: 20px; margin: 30px 0; width: 90%; max-width: 1200px; justify-content: space-between; }
         .stat-card { background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: 4px; padding: 20px; flex: 1; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-card h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; color: var(--text-light); }
         .stat-card .value { font-size: 36px; font-weight: bold; color: var(--ev-black); }
         .stat-card .value.red { color: var(--ev-red); }
 
-        /* --- FILTRI BAR --- */
         .filters-bar { background-color: var(--bg-light); padding: 15px 20px; border-radius: 4px; width: 90%; max-width: 1200px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
         .filters-bar label { font-size: 14px; font-weight: bold; color: var(--ev-black); text-transform: uppercase; letter-spacing: 1px;}
         .filter-select { padding: 8px; border-radius: 3px; border: 1px solid #ccc; font-size: 14px; min-width: 150px; cursor: pointer; }
 
-        .board { display: flex; gap: 25px; width: 95%; max-width: 1400px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
-        .column { background-color: var(--bg-light); border-radius: 4px; width: 32%; min-width: 300px; padding: 20px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; transition: background-color 0.2s; }
+        .board { display: flex; gap: 20px; width: 95%; max-width: 1600px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
+        .column { background-color: var(--bg-light); border-radius: 4px; flex: 1; min-width: 280px; padding: 15px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; transition: background-color 0.2s; }
         .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; }
         .column.inprogress { border-top-color: var(--ev-red); }
         .column.completed { border-top-color: #333; }
-        .column h2 { font-size: 16px; margin-top: 0; color: var(--ev-black); text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .column.blocked { border-top-color: #FFB300; background-color: #fffaf0; }
+        
+        .column h2 { font-size: 15px; margin-top: 0; color: var(--ev-black); text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .task-count { font-size: 12px; background: #ddd; color: #555; padding: 2px 6px; border-radius: 10px; }
         .task-list { min-height: 300px; }
 
+        /* Task Cards */
         .task-card { background-color: var(--ev-white); padding: 15px; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: grab; border-left: 4px solid transparent; position: relative; }
         .task-card:active { cursor: grabbing; opacity: 0.6; transform: scale(0.98); }
         .task-card:hover { box-shadow: 0 5px 10px rgba(0,0,0,0.15); border-left-color: var(--ev-red); }
-        .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
+        .task-card h3 { margin: 8px 0 0 0; font-size: 14px; color: var(--ev-black); font-weight: 600; pointer-events: none; line-height: 1.4;}
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
         .priority-badge { display: inline-block; font-size: 10px; padding: 3px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; pointer-events: none; }
         .priority-alta { background-color: var(--ev-red); color: white; }
         .priority-media { background-color: #FFB300; color: black; }
         .priority-bassa { background-color: #E0E0E0; color: #333; }
-        .dept-badge { font-size: 10px; color: #666; background: #eee; padding: 3px 6px; border-radius: 3px; float: right; pointer-events: none; }
-
-        /* --- BOTTONI GLOBALI (IN BASSO) --- */
-        .add-macro-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
-        .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
         
-        .save-global-btn { position: fixed; bottom: 35px; left: 30px; background-color: var(--ev-black); color: var(--ev-white); border: none; border-radius: 30px; padding: 15px 25px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 90; transition: background 0.2s; letter-spacing: 1px;}
+        .dept-badge { font-size: 10px; color: #666; background: #eee; padding: 3px 6px; border-radius: 3px; float: right; pointer-events: none; }
+        .owner-badge { font-size: 11px; font-weight: bold; color: var(--ev-white); background: var(--ev-black); padding: 4px 8px; border-radius: 15px; margin-bottom: 8px; display: inline-block; pointer-events: none;}
+
+        /* Bottoni */
+        .add-macro-btn { position: fixed; bottom: 80px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
+        .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
+        .save-global-btn { position: fixed; bottom: 85px; left: 30px; background-color: var(--ev-black); color: var(--ev-white); border: none; border-radius: 30px; padding: 15px 25px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 90; transition: background 0.2s; letter-spacing: 1px;}
         .save-global-btn:hover { background-color: #333; transform: scale(1.05); }
 
-        /* --- MODALE --- */
+        /* Modale (Semplificata dal codice precedente) */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
         .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 90%; max-width: 1000px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
         .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
         .close-btn:hover { color: var(--ev-black); }
-        
         .project-meta { margin: 15px 0; padding: 15px; background: var(--bg-light); border-radius: 4px; border: 1px solid var(--border-color); display: flex; gap: 20px; align-items: center; }
         .project-meta label { font-size: 12px; font-weight: bold; color: var(--text-dark); text-transform: uppercase; }
-
         .subtask-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 12px; }
         .subtask-table td { border-bottom: 1px solid var(--border-color); padding: 8px; }
-        
-        .edit-input { width: 95%; padding: 6px; border: 1px solid transparent; border-radius: 3px; font-family: inherit; font-size: 13px; background-color: transparent; transition: all 0.2s; }
+        .edit-input { width: 95%; padding: 6px; border: 1px solid transparent; border-radius: 3px; font-family: inherit; font-size: 13px; background-color: transparent; }
         .edit-input:hover { border-color: #ccc; background-color: #f5f5f5; }
-        .edit-input:focus { outline: none; border-color: var(--ev-red); background-color: #fff; box-shadow: 0 0 0 2px rgba(204,0,0,0.1); }
-        
-        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 13px; cursor: pointer; }
-        .status-select:focus { outline: none; border-color: var(--ev-red); }
-        
-        /* BOTTONI MODALE */
+        .edit-input:focus { outline: none; border-color: var(--ev-red); background-color: #fff; }
+        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 13px; }
         .delete-btn { background-color: transparent; color: var(--text-light); border: none; cursor: pointer; font-size: 16px; font-weight: bold; padding: 5px 10px; }
         .delete-btn:hover { color: var(--ev-red); }
         .add-sub-btn { background-color: var(--bg-light); color: var(--ev-black); border: 1px solid #ccc; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
-        .add-sub-btn:hover { background-color: #e0e0e0; }
-        
         .save-modal-btn { background-color: #2E7D32; color: white; border: none; padding: 10px 20px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; float: right; margin-left: 10px; font-size: 14px;}
-        .save-modal-btn:hover { background-color: #1B5E20; }
-        
         .delete-macro-btn { background-color: var(--ev-white); color: var(--ev-red); border: 1px solid var(--ev-red); padding: 8px 12px; border-radius: 3px; cursor: pointer; margin-top: 15px; float: right; font-size: 12px;}
-        .delete-macro-btn:hover { background-color: var(--ev-red); color: var(--ev-white); }
     </style>
 </head>
 <body>
@@ -101,59 +104,93 @@
         <div id="sync-status">🔄 Sincronizzazione...</div>
     </header>
 
-    <div class="dashboard">
-        <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
-        <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
-        <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
+    <div class="bottom-nav">
+        <button id="nav-macro" class="nav-btn active" onclick="switchView('macro')">📁 MACRO PROGETTI</button>
+        <button id="nav-nl" class="nav-btn" onclick="switchView('newsletter')">📧 PROGETTO NEWSLETTER</button>
     </div>
 
-    <div class="filters-bar">
-        <label>Filtra la vista:</label>
-        <select id="filter-priority" class="filter-select" onchange="renderBoard()">
-            <option value="All">Tutte le Priorità</option>
-            <option value="Alta">🔴 Alta</option>
-            <option value="Media">🟡 Media</option>
-            <option value="Bassa">⚪ Bassa</option>
-        </select>
-        
-        <select id="filter-department" class="filter-select" onchange="renderBoard()">
-            <option value="All">Tutti i Dipartimenti</option>
-            <option value="HR">HR</option>
-            <option value="Sales">Sales</option>
-            <option value="Rent">Rent</option>
-            <option value="Sales administrative assistants">Sales administrative assistants</option>
-            <option value="Area manager">Area manager</option>
-            <option value="Finance">Finance</option>
-            <option value="Legal">Legal</option>
-            <option value="Recruiting">Recruiting</option>
-            <option value="On boarding">On boarding</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Other">Other</option>
-        </select>
+    <div id="view-macro" class="view-section active">
+        <div class="dashboard">
+            <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
+            <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
+            <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
+        </div>
+
+        <div class="filters-bar">
+            <label>Filtra la vista:</label>
+            <select id="filter-priority" class="filter-select" onchange="renderMacroBoard()">
+                <option value="All">Tutte le Priorità</option>
+                <option value="Alta">🔴 Alta</option>
+                <option value="Media">🟡 Media</option>
+                <option value="Bassa">⚪ Bassa</option>
+            </select>
+            <select id="filter-department" class="filter-select" onchange="renderMacroBoard()">
+                <option value="All">Tutti i Dipartimenti</option>
+                <option value="HR">HR</option>
+                <option value="Sales">Sales</option>
+                <option value="Rent">Rent</option>
+                <option value="Sales administrative assistants">SAA</option>
+                <option value="Area manager">Area manager</option>
+                <option value="Finance">Finance</option>
+                <option value="Legal">Legal</option>
+                <option value="Recruiting">Recruiting</option>
+                <option value="On boarding">On boarding</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="board">
+            <div class="column backlog" ondragover="allowDrop(event)" ondrop="dropMacro(event, 'backlog')">
+                <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
+                <div class="task-list" id="list-backlog"></div>
+            </div>
+            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="dropMacro(event, 'inprogress')">
+                <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
+                <div class="task-list" id="list-inprogress"></div>
+            </div>
+            <div class="column completed" ondragover="allowDrop(event)" ondrop="dropMacro(event, 'completed')">
+                <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
+                <div class="task-list" id="list-completed"></div>
+            </div>
+        </div>
+
+        <button class="save-global-btn" id="saveBtnMacro" onclick="forceSaveMacro()">💾 SALVA DB</button>
+        <button class="add-macro-btn" id="addBtnMacro" onclick="addNewMacroTask()">+</button>
     </div>
 
-    <div class="board">
-        <div class="column backlog" id="col-backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')">
-            <h2>Backlog <span class="task-count" id="count-backlog">0</span></h2>
-            <div class="task-list" id="list-backlog"></div>
+
+    <div id="view-newsletter" class="view-section">
+        <div class="dashboard" style="margin-top: 10px;">
+            <div style="width: 100%; text-align: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: var(--ev-red); text-transform: uppercase;">Pipeline Operativa Newsletter</h2>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">I 65 task operativi divisi per stato di avanzamento</p>
+            </div>
         </div>
-        <div class="column inprogress" id="col-inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')">
-            <h2>In Progress <span class="task-count" id="count-inprogress">0</span></h2>
-            <div class="task-list" id="list-inprogress"></div>
-        </div>
-        <div class="column completed" id="col-completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')">
-            <h2>Completed <span class="task-count" id="count-completed">0</span></h2>
-            <div class="task-list" id="list-completed"></div>
+
+        <div class="board">
+            <div class="column backlog" ondragover="allowDrop(event)" ondrop="dropNL(event, 'backlog')">
+                <h2>Da Iniziare <span class="task-count" id="count-nl-backlog">0</span></h2>
+                <div class="task-list" id="list-nl-backlog"></div>
+            </div>
+            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="dropNL(event, 'inprogress')">
+                <h2>In Corso <span class="task-count" id="count-nl-inprogress">0</span></h2>
+                <div class="task-list" id="list-nl-inprogress"></div>
+            </div>
+            <div class="column blocked" ondragover="allowDrop(event)" ondrop="dropNL(event, 'blocked')">
+                <h2>Fermo / Annullato <span class="task-count" id="count-nl-blocked">0</span></h2>
+                <div class="task-list" id="list-nl-blocked"></div>
+            </div>
+            <div class="column completed" ondragover="allowDrop(event)" ondrop="dropNL(event, 'completed')">
+                <h2>Completato <span class="task-count" id="count-nl-completed">0</span></h2>
+                <div class="task-list" id="list-nl-completed"></div>
+            </div>
         </div>
     </div>
-
-    <button class="save-global-btn" onclick="forceSave()" title="Salva tutte le modifiche su Google Sheets">💾 SALVA DATI</button>
-    <button class="add-macro-btn" onclick="addNewMacroTask()" title="Aggiungi Nuovo Progetto">+</button>
 
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            
             <input type="text" id="modalTitleInput" class="edit-input" style="font-size: 24px; font-weight: bold; color: var(--ev-black); margin-bottom: 5px;" onchange="updateProjectName(this.value)">
             
             <div class="project-meta">
@@ -171,7 +208,7 @@
                         <option value="HR">HR</option>
                         <option value="Sales">Sales</option>
                         <option value="Rent">Rent</option>
-                        <option value="Sales administrative assistants">Sales administrative assistants</option>
+                        <option value="Sales administrative assistants">SAA</option>
                         <option value="Area manager">Area manager</option>
                         <option value="Finance">Finance</option>
                         <option value="Legal">Legal</option>
@@ -192,7 +229,6 @@
             
             <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px;">
                 <button class="add-sub-btn" id="addSubTaskBtn">+ Aggiungi Sotto-Task</button>
-                
                 <button class="save-modal-btn" onclick="saveAndCloseModal()">💾 SALVA E CHIUDI</button>
                 <button class="delete-macro-btn" id="deleteMacroBtn">🗑️ Elimina Progetto</button>
             </div>
@@ -202,9 +238,32 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqqTFJrPmqMxoWDaQALpX_GSg2a2VJg-cY4C-S51tVuo3zgDj047p61lwh9z8f4EZ5pQ/exec";
 
-        let projectsData = [];
+        let projectsData = []; // Dati DB Macro
+        let nlData = []; // Dati Locali Newsletter
+        
         const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
         let currentEditingProjectId = null;
+
+        // --- SISTEMA NAVIGAZIONE TAB ---
+        function switchView(viewName) {
+            document.getElementById('view-macro').classList.remove('active');
+            document.getElementById('view-newsletter').classList.remove('active');
+            document.getElementById('nav-macro').classList.remove('active');
+            document.getElementById('nav-nl').classList.remove('active');
+
+            if (viewName === 'macro') {
+                document.getElementById('view-macro').classList.add('active');
+                document.getElementById('nav-macro').classList.add('active');
+                document.getElementById('saveBtnMacro').style.display = 'block';
+                document.getElementById('addBtnMacro').style.display = 'block';
+            } else {
+                document.getElementById('view-newsletter').classList.add('active');
+                document.getElementById('nav-nl').classList.add('active');
+                // Nascondo i tasti globali nella vista NL per ora
+                document.getElementById('saveBtnMacro').style.display = 'none';
+                document.getElementById('addBtnMacro').style.display = 'none';
+            }
+        }
 
         function setSyncStatus(active, text = "🔄 Sincronizzazione...") {
             const el = document.getElementById('sync-status');
@@ -212,35 +271,32 @@
             if(active) el.classList.add('sync-active'); else el.classList.remove('sync-active');
         }
 
-        async function loadData() {
-            setSyncStatus(true, "⬇️ Caricamento dati...");
+        // ==========================================
+        // LOGICA MACRO PROGETTI (Google Sheets)
+        // ==========================================
+        async function loadMacroData() {
+            setSyncStatus(true, "⬇️ Caricamento DB...");
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
                 data.forEach(p => { if(!p.department) p.department = "Other"; });
                 projectsData = data;
-            } catch (error) { console.error("Errore:", error); alert("Errore connessione DB."); }
-            renderBoard();
+            } catch (error) { console.error("Errore:", error); }
+            renderMacroBoard();
             setSyncStatus(false);
         }
 
-        async function saveData() {
-            renderBoard(); 
-            setSyncStatus(true, "⬆️ Salvataggio...");
+        async function saveMacroData() {
+            renderMacroBoard(); 
+            setSyncStatus(true, "⬆️ Salvataggio DB...");
             try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(projectsData) }); } 
             catch (error) { console.error("Errore:", error); }
             setSyncStatus(false);
         }
 
-        // Tasto Salvataggio Globale (Nero)
-        function forceSave() { saveData(); }
+        function forceSaveMacro() { saveMacroData(); }
 
-        // Tasto Salvataggio Modale (Verde)
-        function saveAndCloseModal() { saveData(); closeModal(); }
-
-        document.addEventListener('DOMContentLoaded', () => { loadData(); });
-
-        function renderBoard() {
+        function renderMacroBoard() {
             const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
             Object.values(lists).forEach(list => list.innerHTML = '');
             const counts = { backlog: 0, inprogress: 0, completed: 0 };
@@ -250,10 +306,8 @@
 
             ['backlog', 'inprogress', 'completed'].forEach(status => {
                 let columnTasks = projectsData.filter(p => p.status === status);
-                
                 if (filterPrio !== 'All') columnTasks = columnTasks.filter(p => p.priority === filterPrio);
                 if (filterDept !== 'All') columnTasks = columnTasks.filter(p => p.department === filterDept);
-
                 columnTasks.sort((a, b) => priorityScore[a.priority] - priorityScore[b.priority]);
                 counts[status] = columnTasks.length;
 
@@ -261,22 +315,14 @@
                     const card = document.createElement('div');
                     card.className = 'task-card';
                     card.setAttribute('draggable', 'true');
-                    card.ondragstart = (e) => dragStart(e, project.id);
+                    card.ondragstart = (e) => { e.dataTransfer.setData("text/plain", "macro_" + project.id); };
                     card.ondblclick = () => openModal(project.id);
-                    
-                    const priorityClass = 'priority-' + project.priority.toLowerCase();
-                    const deptDisplay = project.department || "Other";
-
-                    card.innerHTML = `
-                        <div class="priority-badge ${priorityClass}">Priorità ${project.priority}</div>
-                        <div class="dept-badge">${deptDisplay}</div>
-                        <h3>${project.name}</h3>
-                        <p>${project.subtasks.length} sub-tasks</p>
-                    `;
+                    const prioClass = 'priority-' + project.priority.toLowerCase();
+                    const dept = project.department || "Other";
+                    card.innerHTML = `<div class="priority-badge ${prioClass}">Priorità ${project.priority}</div><div class="dept-badge">${dept}</div><h3>${project.name}</h3><p>${project.subtasks.length} sub-tasks</p>`;
                     lists[status].appendChild(card);
                 });
             });
-
             document.getElementById('count-backlog').innerText = counts.backlog;
             document.getElementById('count-inprogress').innerText = counts.inprogress;
             document.getElementById('count-completed').innerText = counts.completed;
@@ -285,114 +331,191 @@
             document.getElementById('stat-completed').innerText = counts.completed;
         }
 
-        function dragStart(event, id) { event.dataTransfer.setData("text/plain", id); }
-        function allowDrop(event) { event.preventDefault(); }
-        function drop(event, newStatus) {
+        function dropMacro(event, newStatus) {
             event.preventDefault();
-            const id = parseInt(event.dataTransfer.getData("text/plain"));
+            const rawId = event.dataTransfer.getData("text/plain");
+            if(!rawId.startsWith("macro_")) return; // Protezione drag incrociato
+            const id = parseInt(rawId.split("_")[1]);
             const project = projectsData.find(p => p.id === id);
-            // Salva su DB in automatico solo col drag&drop
-            if (project && project.status !== newStatus) { project.status = newStatus; saveData(); }
+            if (project && project.status !== newStatus) { project.status = newStatus; saveMacroData(); }
         }
 
+        // ==========================================
+        // LOGICA NEWSLETTER (Memoria Locale con pre-caricamento 65 task)
+        // ==========================================
+        function loadNLData() {
+            const localData = localStorage.getItem('ev_nl_data');
+            if (localData) {
+                nlData = JSON.parse(localData);
+            } else {
+                // IL MEGA DUMP DEI TUOI DATI EXCEL
+                nlData = [
+                    { id: 201, title: "Sistemazione query per adattarla ai MC Italia", owner: "Orfini", status: "completed" },
+                    { id: 202, title: "Matching inverso via NL a partire dall’immobile...", owner: "Orfini", status: "completed" },
+                    { id: 203, title: "Estrazione clienti con stato 'Chiusi da EV' tra gennaio–giugno", owner: "Cuccaro", "status": "blocked" },
+                    { id: 204, title: "Pulizia lista clienti attualmente taggati come VIP", owner: "CRM", status: "backlog" },
+                    { id: 205, title: "Estrazione clienti collegati a EVA classificati come unresponsive", owner: "CRM", status: "blocked" },
+                    { id: 206, title: "Tema legale: email al CEO da Cuccaro/Zaccardo per spiegare blocchi", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 207, title: "Contatto con Spagna per verificare layout email immobili", owner: "CRM + MKT", status: "completed" },
+                    { id: 208, title: "Selezione immobili dal file Portfolio Management per test", owner: "Orfini", status: "completed" },
+                    { id: 209, title: "Estrazione clienti con mandate from ultimi 24 mesi e status Sold", owner: "Cuccaro", status: "completed" },
+                    { id: 210, title: "Definizione criteri cliente VIP", owner: "MKT", status: "completed" },
+                    { id: 211, title: "Avvio prima newsletter tramite EVA–OPTIVO", owner: "CRM + MKT", status: "blocked" },
+                    { id: 212, title: "Possibile escalation ad Amburgo per risoluzione problemi tecnici", owner: "CRM", status: "inprogress" },
+                    { id: 213, title: "Allineamento parametri UTM da inserire nella NL", owner: "CRM + MKT", status: "completed" },
+                    { id: 214, title: "Spiegazione Portfolio Management a Marketing", owner: "Cuccaro", status: "completed" },
+                    { id: 215, title: "Chiarimenti con SAA su mancanza dati KYC", owner: "Cuccaro", status: "completed" },
+                    { id: 216, title: "Estrazione clienti con budget >= 1M", owner: "Cuccaro", status: "blocked" },
+                    { id: 217, title: "Allineamento con Legal e chiarimenti; mandato inviato", owner: "CRM", status: "inprogress" },
+                    { id: 218, title: "Finalizzare dati pie di pagina EVA per inviare consensi GDPR", owner: "CRM", status: "inprogress" },
+                    { id: 219, title: "Verifica UTM e conferma definizione + contenuti", owner: "Orfini", status: "completed" },
+                    { id: 220, title: "Verifica fattibilità di invio matching inverso", owner: "Orfini", status: "blocked" },
+                    { id: 221, title: "Comunicazione ai SAA e Area Manager sull’iniziativa", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 222, title: "Procedura per flaggare correttamente i VIP", owner: "CRM", status: "inprogress" },
+                    { id: 223, title: "Sollecitare legal per i footer per il CRM", owner: "CRM", status: "inprogress" },
+                    { id: 224, title: "Richiesta intenti con NL applicabile sul sito", owner: "MKT", status: "inprogress" },
+                    { id: 225, title: "Test invio immobili multipli vs singoli tramite NL", owner: "CRM + MKT", status: "completed" },
+                    { id: 226, title: "Spiegazione processo ai Sales", owner: "Cuccaro", status: "inprogress" },
+                    { id: 227, title: "Filtro clienti effettivi per team per evitare rischi", owner: "CRM", status: "blocked" },
+                    { id: 228, title: "Comunicazione avvio e chiusura procedura con check", owner: "CRM + MKT", status: "backlog" },
+                    { id: 229, title: "Applicare la richiesta intenti NL sul CRM?", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 230, title: "Comunicazione agli agenti sull’avvio NL", owner: "CRM + MKT", status: "backlog" },
+                    { id: 231, title: "Primo esperimento solo con lead attivi", owner: "CRM + MKT", status: "blocked" },
+                    { id: 232, title: "Spiegazione procedura ai Sales Director", owner: "Cuccaro", status: "backlog" },
+                    { id: 233, title: "Estrazione clienti con budget in base al team Boellis", owner: "Cuccaro", status: "inprogress" },
+                    { id: 234, title: "Automazione iscrizione NL da sito con flag MKT", owner: "CRM", status: "inprogress" },
+                    { id: 235, title: "Adattare query agli scaduti + filtro auto generated", owner: "Orfini", status: "backlog" },
+                    { id: 236, title: "Decidere se procedere da NL o Area Manager", owner: "CRM", status: "completed" },
+                    { id: 237, title: "Condivisione file con AM e SAA per esclusioni", owner: "Orfini", status: "blocked" },
+                    { id: 238, title: "Lista multiproprietari con incarico dato", owner: "Cuccaro", status: "inprogress" },
+                    { id: 239, title: "Leads dal sito con GDPR NL automatico", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 240, title: "Training optimizely", owner: "CRM + MKT", status: "completed" },
+                    { id: 241, title: "Organizzare riunione per avviare NL", owner: "CRM + MKT", status: "backlog" },
+                    { id: 242, title: "Controllo dati KYC in CRM", owner: "Cuccaro", status: "blocked" },
+                    { id: 243, title: "Come ottenere il consenso VIP, comunicazione ad HOC?", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 244, title: "Flag leads di 6 mesi fa auto generati", owner: "CRM", status: "inprogress" },
+                    { id: 245, title: "Escludere immobili commerciali (solo lead_auto_gen)", owner: "Orfini", status: "completed" },
+                    { id: 246, title: "Criteri di selezione portfolio management", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 247, title: "Controllo legal GDPR per incarichi ultimi 24 mesi", owner: "Zaccardo", status: "completed" },
+                    { id: 248, title: "Integrare consenso VIP offline e online", owner: "MKT", status: "inprogress" },
+                    { id: 249, title: "Contatta Donovan per ID NL per shop", owner: "CRM", status: "inprogress" },
+                    { id: 250, title: "Esperimenti Hyperfields optimizely", owner: "CRM + MKT", status: "completed" },
+                    { id: 251, title: "Selezioni immobili da PM AREA MANAGERS", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 252, title: "Richiesta consensi GDPR NL/MKT da EVA", owner: "Cuccaro", status: "inprogress" },
+                    { id: 253, title: "Test NL matching a maggio", owner: "CRM", status: "inprogress" },
+                    { id: 254, title: "Organizzare riunione avvio NL (Zaccardo)", owner: "Zaccardo", status: "inprogress" },
+                    { id: 255, title: "Correggere immobili senza flag", owner: "CRM", status: "inprogress" },
+                    { id: 256, title: "Comunicazione tech aggiunta Newsletter", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 257, title: "Esclusione stesso immobile a prescindere dal cliente", owner: "Orfini", status: "completed" },
+                    { id: 258, title: "Raccolta feedback NL matching inverso", owner: "MKT", status: "inprogress" },
+                    { id: 259, title: "Processo comunicazione clienti inserimento in NL", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 260, title: "Escludere locali commerciali (Orfini)", owner: "Orfini", status: "completed" },
+                    { id: 261, title: "Info con Sales director parametri Exposè PM", owner: "CRM + MKT", status: "inprogress" },
+                    { id: 262, title: "Consenso offline da aggiungere documenti mediazione", owner: "Zaccardo", status: "inprogress" },
+                    { id: 263, title: "Includere solamente ultimo immobile attivato", owner: "Orfini", status: "completed" },
+                    { id: 264, title: "Processo inserimento GDPR in EVA per SAA", owner: "Cuccaro", status: "inprogress" },
+                    { id: 265, title: "Ipotesi recupero massivo clienti incarico rolling 24m", owner: "CRM + MKT", status: "inprogress" }
+                ];
+                saveNLData();
+            }
+            renderNLBoard();
+        }
+
+        function saveNLData() { localStorage.setItem('ev_nl_data', JSON.stringify(nlData)); renderNLBoard(); }
+
+        function renderNLBoard() {
+            const lists = { backlog: document.getElementById('list-nl-backlog'), inprogress: document.getElementById('list-nl-inprogress'), completed: document.getElementById('list-nl-completed'), blocked: document.getElementById('list-nl-blocked') };
+            Object.values(lists).forEach(list => list.innerHTML = '');
+            const counts = { backlog: 0, inprogress: 0, completed: 0, blocked: 0 };
+            
+            ['backlog', 'inprogress', 'blocked', 'completed'].forEach(status => {
+                let columnTasks = nlData.filter(t => t.status === status);
+                counts[status] = columnTasks.length;
+
+                columnTasks.forEach(task => {
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    card.setAttribute('draggable', 'true');
+                    card.ondragstart = (e) => { e.dataTransfer.setData("text/plain", "nl_" + task.id); };
+                    
+                    let ownerColor = "#333";
+                    if(task.owner.includes("Orfini")) ownerColor = "#00529B";
+                    if(task.owner.includes("Cuccaro")) ownerColor = "#4A148C";
+                    if(task.owner.includes("MKT")) ownerColor = "#E65100";
+                    if(task.owner.includes("CRM")) ownerColor = "#004D40";
+                    
+                    card.innerHTML = `
+                        <div class="owner-badge" style="background:${ownerColor}">${task.owner}</div>
+                        <h3>${task.title}</h3>
+                    `;
+                    lists[status].appendChild(card);
+                });
+            });
+
+            document.getElementById('count-nl-backlog').innerText = counts.backlog;
+            document.getElementById('count-nl-inprogress').innerText = counts.inprogress;
+            document.getElementById('count-nl-completed').innerText = counts.completed;
+            document.getElementById('count-nl-blocked').innerText = counts.blocked;
+        }
+
+        function dropNL(event, newStatus) {
+            event.preventDefault();
+            const rawId = event.dataTransfer.getData("text/plain");
+            if(!rawId.startsWith("nl_")) return; // Protezione drag incrociato
+            const id = parseInt(rawId.split("_")[1]);
+            const task = nlData.find(t => t.id === id);
+            if (task && task.status !== newStatus) { task.status = newStatus; saveNLData(); }
+        }
+
+        function allowDrop(event) { event.preventDefault(); }
+
+
+        // ==========================================
+        // GESTIONE MODALE (Solo per i Macro Progetti per ora)
+        // ==========================================
         function addNewMacroTask() {
             const newId = Date.now();
-            const newProject = { 
-                id: newId, 
-                name: "Nuovo Progetto (Clicca per rinominare)", 
-                status: "backlog", 
-                priority: "Media", 
-                department: "Other", 
-                subtasks: [] 
-            };
-            projectsData.push(newProject);
-            // Non salvo subito su DB, così apri, compili e salvi col pulsante verde
-            openModal(newId); 
-            renderBoard();
+            projectsData.push({ id: newId, name: "Nuovo Progetto", status: "backlog", priority: "Media", department: "Other", subtasks: [] });
+            openModal(newId); renderMacroBoard();
         }
 
         function openModal(projectId) {
             currentEditingProjectId = projectId;
             const project = projectsData.find(p => p.id === projectId);
-            
             document.getElementById('modalTitleInput').value = project.name;
             document.getElementById('modalPriority').value = project.priority;
             document.getElementById('modalDepartment').value = project.department || "Other";
-            
             renderSubTasksTable(project);
-            
-            document.getElementById('addSubTaskBtn').onclick = () => { 
-                project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" }); 
-                renderSubTasksTable(project); // Aggiorna solo la grafica, NON salva su DB
-            };
-            
-            document.getElementById('deleteMacroBtn').onclick = () => { 
-                if(confirm("Eliminare intero Progetto?")) { 
-                    projectsData = projectsData.filter(p => p.id !== projectId); 
-                    saveData(); 
-                    closeModal(); 
-                } 
-            };
-            
+            document.getElementById('addSubTaskBtn').onclick = () => { project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" }); renderSubTasksTable(project); };
+            document.getElementById('deleteMacroBtn').onclick = () => { if(confirm("Eliminare intero Progetto?")) { projectsData = projectsData.filter(p => p.id !== projectId); saveMacroData(); closeModal(); } };
             document.getElementById('taskModal').style.display = 'block';
         }
-
-        // Funzioni modificate: ora aggiornano solo la memoria locale, senza salvare su Google Sheets ogni volta
-        function updateProjectName(newName) {
-            if (currentEditingProjectId && newName.trim() !== "") {
-                const project = projectsData.find(p => p.id === currentEditingProjectId);
-                if (project) { project.name = newName; }
-            }
-        }
-
-        function updateProjectField(field, newValue) { 
-            if (currentEditingProjectId) { 
-                const project = projectsData.find(p => p.id === currentEditingProjectId); 
-                if (project) { project[field] = newValue; } 
-            } 
-        }
-
+        function updateProjectName(newName) { if (currentEditingProjectId && newName.trim() !== "") { const project = projectsData.find(p => p.id === currentEditingProjectId); if (project) { project.name = newName; } } }
+        function updateProjectField(field, newValue) { if (currentEditingProjectId) { const project = projectsData.find(p => p.id === currentEditingProjectId); if (project) { project[field] = newValue; } } }
         function renderSubTasksTable(project) {
-            const tbody = document.getElementById('subtaskTableBody');
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('subtaskTableBody'); tbody.innerHTML = '';
             project.subtasks.forEach((sub, index) => { 
                 tbody.innerHTML += `<tr>
                     <td><input type="text" class="edit-input" value="${sub.title}" onchange="updateSubTask(${project.id}, ${index}, 'title', this.value)"></td>
                     <td><select class="status-select" onchange="updateSubTask(${project.id}, ${index}, 'status', this.value)">
-                        <option value="Da Iniziare" ${sub.status === 'Da Iniziare' ? 'selected' : ''}>Da Iniziare</option>
-                        <option value="In corso" ${sub.status === 'In corso' ? 'selected' : ''}>In corso</option>
-                        <option value="Completato" ${sub.status === 'Completato' ? 'selected' : ''}>Completato</option>
-                        <option value="Bloccato" ${sub.status === 'Bloccato' ? 'selected' : ''}>Bloccato</option>
+                        <option value="Da Iniziare" ${sub.status === 'Da Iniziare' ? 'selected' : ''}>Da Iniziare</option><option value="In corso" ${sub.status === 'In corso' ? 'selected' : ''}>In corso</option><option value="Completato" ${sub.status === 'Completato' ? 'selected' : ''}>Completato</option><option value="Bloccato" ${sub.status === 'Bloccato' ? 'selected' : ''}>Bloccato</option>
                     </select></td>
                     <td><input type="text" class="edit-input" value="${sub.comment}" placeholder="Note..." onchange="updateSubTask(${project.id}, ${index}, 'comment', this.value)"></td>
                     <td><button class="delete-btn" onclick="deleteSubTask(${project.id}, ${index})">✕</button></td>
                 </tr>`; 
             });
         }
-
-        function updateSubTask(projectId, subIndex, field, newValue) { 
-            const project = projectsData.find(p => p.id === projectId); 
-            if (project && project.subtasks[subIndex]) { project.subtasks[subIndex][field] = newValue; } 
-        }
-
-        function deleteSubTask(projectId, subIndex) { 
-            if(confirm("Eliminare questo sotto-task?")) { 
-                const project = projectsData.find(p => p.id === projectId); 
-                if (project) { project.subtasks.splice(subIndex, 1); renderSubTasksTable(project); } 
-            } 
-        }
-
+        function updateSubTask(projectId, subIndex, field, newValue) { const project = projectsData.find(p => p.id === projectId); if (project && project.subtasks[subIndex]) { project.subtasks[subIndex][field] = newValue; } }
+        function deleteSubTask(projectId, subIndex) { if(confirm("Eliminare questo sotto-task?")) { const project = projectsData.find(p => p.id === projectId); if (project) { project.subtasks.splice(subIndex, 1); renderSubTasksTable(project); } } }
+        function saveAndCloseModal() { saveMacroData(); closeModal(); }
         function closeModal() { document.getElementById('taskModal').style.display = 'none'; currentEditingProjectId = null; }
         
-        // Se l'utente clicca fuori, chiediamo se vuole chiudere (senza salvare per forza)
-        window.onclick = function(e) { 
-            let modal = document.getElementById('taskModal');
-            if(e.target == modal) {
-                if(confirm("Chiudere senza salvare le ultime modifiche? Premi 'Salva e Chiudi' se vuoi mantenere le modifiche.")) {
-                    closeModal();
-                }
-            } 
-        }
+        // Avvio Iniziale
+        document.addEventListener('DOMContentLoaded', () => { 
+            loadMacroData(); 
+            loadNLData(); 
+        });
+
     </script>
 </body>
 </html>
