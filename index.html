@@ -49,11 +49,19 @@
         .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
+        /* --- PROGRESS BAR STYLES --- */
+        .progress-wrapper { margin-top: 12px; pointer-events: none; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-light); margin-bottom: 4px; font-weight: bold; }
+        .progress-bar-container { width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background-color: #2E7D32; transition: width 0.4s ease-in-out; }
+        .progress-bar-fill.zero { background-color: transparent; }
+
         .priority-badge { display: inline-block; font-size: 10px; padding: 3px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; pointer-events: none; }
         .priority-alta { background-color: var(--ev-red); color: white; }
         .priority-media { background-color: #FFB300; color: black; }
         .priority-bassa { background-color: #E0E0E0; color: #333; }
         .dept-badge { font-size: 10px; color: #666; background: #eee; padding: 3px 6px; border-radius: 3px; float: right; pointer-events: none; }
+        .owner-badge { font-size: 11px; font-weight: bold; color: var(--ev-white); background: var(--ev-black); padding: 4px 8px; border-radius: 15px; margin-bottom: 8px; display: inline-block; pointer-events: none;}
 
         .add-macro-btn { position: fixed; bottom: 80px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
         .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
@@ -114,14 +122,14 @@
 
     <div id="view-newsletter" class="view-section">
         <div class="dashboard">
-            <div class="stat-card"><h3>Task NLP</h3><div class="value" id="stat-total-nl">0</div></div>
+            <div class="stat-card"><h3>Cluster NLP</h3><div class="value" id="stat-total-nl">0</div></div>
             <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress-nl">0</div></div>
             <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed-nl">0</div></div>
         </div>
         <div class="board">
-            <div class="column backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')"><h2>Backlog <span class="task-count" id="count-backlog-nl">0</span></h2><div class="task-list" id="list-backlog-nl"></div></div>
-            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')"><h2>In Progress <span class="task-count" id="count-inprogress-nl">0</span></h2><div class="task-list" id="list-inprogress-nl"></div></div>
-            <div class="column completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')"><h2>Completed <span class="task-count" id="count-completed-nl">0</span></h2><div class="task-list" id="list-completed-nl"></div></div>
+            <div class="column backlog" ondragover="allowDrop(event)" ondrop="drop(event, 'backlog')"><h2>Da Iniziare <span class="task-count" id="count-backlog-nl">0</span></h2><div class="task-list" id="list-backlog-nl"></div></div>
+            <div class="column inprogress" ondragover="allowDrop(event)" ondrop="drop(event, 'inprogress')"><h2>In Corso <span class="task-count" id="count-inprogress-nl">0</span></h2><div class="task-list" id="list-inprogress-nl"></div></div>
+            <div class="column completed" ondragover="allowDrop(event)" ondrop="drop(event, 'completed')"><h2>Completato <span class="task-count" id="count-completed-nl">0</span></h2><div class="task-list" id="list-completed-nl"></div></div>
         </div>
     </div>
 
@@ -157,7 +165,7 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqqTFJrPmqMxoWDaQALpX_GSg2a2VJg-cY4C-S51tVuo3zgDj047p61lwh9z8f4EZ5pQ/exec";
         
         let projectsData = [];
-        let currentView = 'macro'; // o 'newsletter'
+        let currentView = 'macro'; 
         let currentEditingProjectId = null;
         const priorityScore = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
 
@@ -176,96 +184,16 @@
             renderBoard();
         }
 
-        // --- I TUOI DATI EXCEL DELLA NEWSLETTER TRADOTTI IN CODICE ---
-        const initialNLData = [
-            { id: 901, name: "1. NL Matching Immobili", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
-                {title: "Sistemazione query per adattarla ai MC Italia", owner: "Orfini", status: "Completato", comment: ""},
-                {title: "Contatto con Spagna per verificare se le email contengono immobili...", owner: "CRM + MKT", status: "Completato", comment: ""},
-                {title: "Allineamento parametri UTM da inserire nella NL", owner: "CRM + MKT", status: "Completato", comment: ""},
-                {title: "Verifica UTM e conferma definizione + contenuti", owner: "Orfini", status: "Completato", comment: ""},
-                {title: "Test invio immobili multipli vs singoli tramite NL", owner: "CRM + MKT", status: "Completato", comment: ""},
-                {title: "Comunicazione agli agenti sull'avvio NL", owner: "CRM + MKT", status: "Da Iniziare", comment: ""},
-                {title: "Adattare query agli scaduti + filtro lead auto generated", owner: "Orfini", status: "Da Iniziare", comment: ""},
-                {title: "Training optimizely", owner: "CRM + MKT", status: "Completato", comment: ""},
-                {title: "Escludere immobili commerciali Includi solo lead_auto_generated", owner: "Orfini", status: "Completato", comment: ""},
-                {title: "Esperimenti Hyperfields optimizely", owner: "CRM + MKT", status: "Completato", comment: ""},
-                {title: "Organizzare riunione per discutere come avviare NL", owner: "Zaccardo", status: "In corso", comment: ""},
-                {title: "Esclusione stesso immobile a prescindere del cliente", owner: "Orfini", status: "Completato", comment: ""}
-            ]},
-            { id: 902, name: "2. NL Matching Inverso", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
-                {title: "Matching inverso via NL a partire dall'immobile", owner: "Orfini", status: "Completato", comment: ""},
-                {title: "Selezione immobili dal PM per test", owner: "Orfini", status: "Completato", comment: ""},
-                {title: "Spiegazione PM a Marketing", owner: "Cuccaro", status: "Completato", comment: ""},
-                {title: "Verifica fattibilità invio matching inverso", owner: "Orfini", status: "Bloccato", comment: ""},
-                {title: "Spiegazione processo ai Sales", owner: "Cuccaro", status: "In corso", comment: ""},
-                {title: "Primo esperimento solo con lead attivi", owner: "CRM + MKT", status: "Bloccato", comment: ""},
-                {title: "Decidere se procedere da NL o tramite AM", owner: "CRM", status: "Completato", comment: ""},
-                {title: "Organizzare riunione", owner: "CRM + MKT", status: "Da Iniziare", comment: ""},
-                {title: "Criteri selezione portfolio management", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Selezioni immobili dal PM AREA MANAGERS", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Correggere immobili senza flag", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Raccolta e consegna feedback", owner: "MKT", status: "In corso", comment: ""}
-            ]},
-            { id: 903, name: "3. Cluster clienti venduto con E&V", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
-                {title: "Estrazione clienti stato Chiusi da EV gen-giu", owner: "Cuccaro", status: "Bloccato", comment: ""},
-                {title: "Estrazione clienti mandate from ultimi 24 mesi status Sold", owner: "Cuccaro", status: "Completato", comment: ""},
-                {title: "Condivisione file con AM e SAA per esclusioni legali", owner: "Orfini", status: "Bloccato", comment: ""},
-                {title: "Controllo dati KYC in CRM", owner: "Cuccaro", status: "Bloccato", comment: ""},
-                {title: "Controllo legal GDPR marketing per chi ha avuto incarico ultimi 24m", owner: "Zaccardo", status: "Completato", comment: ""},
-                {title: "Richiesta consensi GDPR per NL e MKT da EVA diretto", owner: "Cuccaro", status: "In corso", comment: ""},
-                {title: "Comunicazione del tech aggiunta Newsletter", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Processo di comunicazione ai clienti per casistica inserimento in NL", owner: "CRM + MKT", status: "In corso", comment: ""}
-            ]},
-            { id: 904, name: "4. Cluster clienti VIP", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
-                {title: "Pulizia lista clienti taggati VIP", owner: "CRM", status: "Da Iniziare", comment: ""},
-                {title: "Definizione criteri cliente VIP", owner: "MKT", status: "Completato", comment: ""},
-                {title: "Estrazione clienti budget >= 1M", owner: "Cuccaro", status: "Bloccato", comment: ""},
-                {title: "Procedura per flaggare VIP", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Comunicazione avvio e chiusura", owner: "CRM + MKT", status: "Da Iniziare", comment: ""},
-                {title: "Estrazione clienti budget team Boellis", owner: "Cuccaro", status: "In corso", comment: ""},
-                {title: "Lista multiproprietari con incarico", owner: "Cuccaro", status: "In corso", comment: ""},
-                {title: "Scegliere come ottenere consenso VIP", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Integrare consenso offline online", owner: "MKT", status: "In corso", comment: ""}
-            ]},
-            { id: 905, name: "5. Nurturing Seller Leads", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
-                {title: "Estrazione clienti unresponsive", owner: "CRM", status: "Bloccato", comment: ""},
-                {title: "Avvio prima newsletter tramite EVA-OPTIVO", owner: "CRM + MKT", status: "Bloccato", comment: ""},
-                {title: "Allineamento Legal; mandato per conferma", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Sollecitare legal footer CRM", owner: "CRM", status: "In corso", comment: ""}
-            ]},
-            { id: 906, name: "6. Criticità / Note", status: "inprogress", priority: "Media", department: "Marketing", category: "Newsletter", subtasks: [
-                {title: "Tema legale: email CEO per blocchi tecnici", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Possibile escalation Amburgo", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Finalizzare dati pie pagina EVA consensi GDPR", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Richiesta intenti con NL applicabile sito", owner: "MKT", status: "In corso", comment: ""},
-                {title: "Applicare richiesta intenti NL sul CRM?", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Automazione iscrizione NL da sito con flag", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Leads dal sito con GDPR NL automatico", owner: "CRM + MKT", status: "In corso", comment: ""},
-                {title: "Flag leads 6 mesi fa auto generati", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Contatta Donovan per ID NL shop", owner: "CRM", status: "In corso", comment: ""},
-                {title: "Test NL matching a maggio", owner: "CRM", status: "In corso", comment: ""}
-            ]}
-        ];
-
         async function loadData() {
             setSyncStatus(true, "⬇️ Caricamento DB...");
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
-                
-                // Seleziona la Categoria corretta (default Macro)
                 data.forEach(p => { 
                     if(!p.department) p.department = "Other"; 
                     if(!p.category) p.category = "Macro"; 
                 });
                 projectsData = data;
-
-                // Se non ci sono progetti Newsletter, INIETTA automaticamente i dati excel!
-                if(projectsData.filter(p => p.category === 'Newsletter').length === 0) {
-                    projectsData = projectsData.concat(initialNLData);
-                    saveData(); // Li salva subito nel DB per sempre
-                }
-
             } catch (error) { console.error("Errore DB:", error); }
             renderBoard();
             setSyncStatus(false);
@@ -282,7 +210,6 @@
         document.addEventListener('DOMContentLoaded', () => { loadData(); });
 
         function renderBoard() {
-            // Seleziona dove scrivere in base alla view corrente
             const suffix = currentView === 'macro' ? '-m' : '-nl';
             const lists = { 
                 backlog: document.getElementById('list-backlog' + suffix), 
@@ -293,10 +220,8 @@
             Object.values(lists).forEach(list => list.innerHTML = '');
             const counts = { backlog: 0, inprogress: 0, completed: 0 };
             
-            // Filtra solo i progetti della View corrente
             let viewProjects = projectsData.filter(p => p.category === (currentView === 'macro' ? 'Macro' : 'Newsletter'));
 
-            // Applica filtri solo nella vista Macro
             if (currentView === 'macro') {
                 const filterPrio = document.getElementById('filter-priority').value;
                 const filterDept = document.getElementById('filter-department').value;
@@ -316,12 +241,37 @@
                     card.ondragstart = (e) => e.dataTransfer.setData("text/plain", project.id);
                     card.ondblclick = () => openModal(project.id);
                     
+                    // --- CALCOLO BARRA DI PROGRESSO ---
+                    let totalSubs = project.subtasks.length;
+                    let completedSubs = project.subtasks.filter(s => s.status === 'Completato').length;
+                    let progressPercent = totalSubs === 0 ? 0 : Math.round((completedSubs / totalSubs) * 100);
+                    let barClass = progressPercent === 0 ? "zero" : "";
+
+                    let progressHtml = `
+                        <div class="progress-wrapper">
+                            <div class="progress-header">
+                                <span>Avanzamento</span>
+                                <span>${completedSubs}/${totalSubs} (${progressPercent}%)</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill ${barClass}" style="width: ${progressPercent}%;"></div>
+                            </div>
+                        </div>
+                    `;
+
                     if(currentView === 'macro') {
                         const prioClass = 'priority-' + project.priority.toLowerCase();
-                        card.innerHTML = `<div class="priority-badge ${prioClass}">Priorità ${project.priority}</div><div class="dept-badge">${project.department}</div><h3>${project.name}</h3><p>${project.subtasks.length} sub-tasks</p>`;
+                        card.innerHTML = `
+                            <div class="priority-badge ${prioClass}">Priorità ${project.priority}</div>
+                            <div class="dept-badge">${project.department}</div>
+                            <h3>${project.name}</h3>
+                            ${progressHtml}
+                        `;
                     } else {
-                        // Vista Newsletter: più pulita
-                        card.innerHTML = `<h3>${project.name}</h3><p>📌 ${project.subtasks.length} task collegati</p>`;
+                        card.innerHTML = `
+                            <h3>${project.name}</h3>
+                            ${progressHtml}
+                        `;
                     }
                     lists[status].appendChild(card);
                 });
