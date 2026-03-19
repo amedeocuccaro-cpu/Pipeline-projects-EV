@@ -114,6 +114,7 @@
             <option value="Sales administrative assistants">Sales administrative assistants</option>
             <option value="Area manager">Area manager</option>
             <option value="Finance">Finance</option>
+            <option value="Legal">Legal</option>
             <option value="Recruiting">Recruiting</option>
             <option value="On boarding">On boarding</option>
             <option value="Marketing">Marketing</option>
@@ -162,6 +163,7 @@
                         <option value="Sales administrative assistants">Sales administrative assistants</option>
                         <option value="Area manager">Area manager</option>
                         <option value="Finance">Finance</option>
+                        <option value="Legal">Legal</option>
                         <option value="Recruiting">Recruiting</option>
                         <option value="On boarding">On boarding</option>
                         <option value="Marketing">Marketing</option>
@@ -276,7 +278,6 @@
             if (project && project.status !== newStatus) { project.status = newStatus; saveData(); }
         }
 
-        // NUOVA LOGICA CREAZIONE PROGETTO: Apre subito la modale!
         function addNewMacroTask() {
             const newId = Date.now();
             const newProject = { 
