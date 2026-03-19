@@ -27,8 +27,12 @@
         .stat-card .value { font-size: 36px; font-weight: bold; color: var(--ev-black); }
         .stat-card .value.red { color: var(--ev-red); }
 
+        /* --- FILTRI BAR --- */
+        .filters-bar { background-color: var(--bg-light); padding: 15px 20px; border-radius: 4px; width: 90%; max-width: 1200px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color); }
+        .filters-bar label { font-size: 14px; font-weight: bold; color: var(--ev-black); text-transform: uppercase; letter-spacing: 1px;}
+        .filter-select { padding: 8px; border-radius: 3px; border: 1px solid #ccc; font-size: 14px; min-width: 150px; cursor: pointer; }
+
         .board { display: flex; gap: 25px; width: 95%; max-width: 1400px; justify-content: center; align-items: flex-start; margin-bottom: 50px; }
-        
         .column { background-color: var(--bg-light); border-radius: 4px; width: 32%; min-width: 300px; padding: 20px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); border-top: 3px solid var(--ev-black); min-height: 400px; transition: background-color 0.2s; }
         .column.drag-over { background-color: #e8f0fe; border: 2px dashed #4285f4; }
         .column.inprogress { border-top-color: var(--ev-red); }
@@ -43,10 +47,11 @@
         .task-card h3 { margin: 8px 0 0 0; font-size: 15px; color: var(--ev-black); font-weight: 600; pointer-events: none; }
         .task-card p { margin: 5px 0 0 0; font-size: 12px; color: var(--text-light); pointer-events: none; }
         
-        .priority-badge { display: inline-block; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; pointer-events: none; }
+        .priority-badge { display: inline-block; font-size: 10px; padding: 3px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; pointer-events: none; }
         .priority-alta { background-color: var(--ev-red); color: white; }
         .priority-media { background-color: #FFB300; color: black; }
         .priority-bassa { background-color: #E0E0E0; color: #333; }
+        .dept-badge { font-size: 10px; color: #666; background: #eee; padding: 3px 6px; border-radius: 3px; float: right; pointer-events: none; }
 
         .add-macro-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--ev-red); color: var(--ev-white); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(204,0,0,0.4); z-index: 90; }
         .add-macro-btn:hover { transform: scale(1.1); background-color: #a30000; }
@@ -55,10 +60,9 @@
         .modal-content { background-color: var(--ev-white); margin: 4% auto; padding: 30px; border-radius: 4px; width: 90%; max-width: 1000px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); position: relative; border-top: 5px solid var(--ev-red); }
         .close-btn { position: absolute; top: 15px; right: 20px; color: var(--text-light); font-size: 24px; cursor: pointer; }
         .close-btn:hover { color: var(--ev-black); }
-        .modal-header h2 { margin: 0; color: var(--ev-black); font-size: 22px; }
         
-        .project-meta { margin: 15px 0; padding: 10px; background: var(--bg-light); border-radius: 4px; border: 1px solid var(--border-color); display: inline-block; }
-        .project-meta label { font-size: 12px; font-weight: bold; color: var(--text-dark); margin-right: 10px; text-transform: uppercase; }
+        .project-meta { margin: 15px 0; padding: 15px; background: var(--bg-light); border-radius: 4px; border: 1px solid var(--border-color); display: flex; gap: 20px; align-items: center; }
+        .project-meta label { font-size: 12px; font-weight: bold; color: var(--text-dark); text-transform: uppercase; }
 
         .subtask-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .subtask-table th { text-align: left; background-color: var(--ev-black); color: var(--ev-white); padding: 10px; font-size: 12px; }
@@ -68,15 +72,13 @@
         .edit-input:hover { border-color: #ccc; background-color: #f5f5f5; }
         .edit-input:focus { outline: none; border-color: var(--ev-red); background-color: #fff; box-shadow: 0 0 0 2px rgba(204,0,0,0.1); }
         
-        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 12px; cursor: pointer; }
+        .status-select { padding: 5px; border-radius: 3px; border: 1px solid #ccc; font-size: 13px; cursor: pointer; }
         .status-select:focus { outline: none; border-color: var(--ev-red); }
         
         .delete-btn { background-color: transparent; color: var(--text-light); border: none; cursor: pointer; font-size: 16px; font-weight: bold; padding: 5px 10px; }
         .delete-btn:hover { color: var(--ev-red); }
-
         .add-sub-btn { background-color: var(--ev-black); color: var(--ev-white); border: none; padding: 10px 15px; border-radius: 3px; cursor: pointer; margin-top: 15px; font-weight: bold; }
         .add-sub-btn:hover { background-color: var(--ev-red); }
-        
         .delete-macro-btn { background-color: var(--ev-white); color: var(--ev-red); border: 1px solid var(--ev-red); padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 15px; float: right; font-size: 12px;}
         .delete-macro-btn:hover { background-color: var(--ev-red); color: var(--ev-white); }
     </style>
@@ -93,6 +95,30 @@
         <div class="stat-card"><h3>Totale Progetti</h3><div class="value" id="stat-total">0</div></div>
         <div class="stat-card"><h3>In Corso</h3><div class="value red" id="stat-inprogress">0</div></div>
         <div class="stat-card"><h3>Completati</h3><div class="value" id="stat-completed">0</div></div>
+    </div>
+
+    <div class="filters-bar">
+        <label>Filtra la vista:</label>
+        <select id="filter-priority" class="filter-select" onchange="renderBoard()">
+            <option value="All">Tutte le Priorità</option>
+            <option value="Alta">🔴 Alta</option>
+            <option value="Media">🟡 Media</option>
+            <option value="Bassa">⚪ Bassa</option>
+        </select>
+        
+        <select id="filter-department" class="filter-select" onchange="renderBoard()">
+            <option value="All">Tutti i Dipartimenti</option>
+            <option value="HR">HR</option>
+            <option value="Sales">Sales</option>
+            <option value="Rent">Rent</option>
+            <option value="Sales administrative assistants">Sales administrative assistants</option>
+            <option value="Area manager">Area manager</option>
+            <option value="Finance">Finance</option>
+            <option value="Recruiting">Recruiting</option>
+            <option value="On boarding">On boarding</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Other">Other</option>
+        </select>
     </div>
 
     <div class="board">
@@ -115,19 +141,36 @@
     <div id="taskModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div class="modal-header">
-                <h2 id="modalTitle">Nome Progetto</h2>
-                
-                <div class="project-meta">
-                    <label for="modalPriority">Priorità Progetto:</label>
-                    <select id="modalPriority" class="status-select" onchange="updateProjectPriority(this.value)">
+            
+            <input type="text" id="modalTitleInput" class="edit-input" style="font-size: 24px; font-weight: bold; color: var(--ev-black); margin-bottom: 5px;" onchange="updateProjectName(this.value)">
+            
+            <div class="project-meta">
+                <div>
+                    <label>Priorità:</label><br>
+                    <select id="modalPriority" class="status-select" onchange="updateProjectField('priority', this.value)">
                         <option value="Alta">🔴 Alta</option>
                         <option value="Media">🟡 Media</option>
                         <option value="Bassa">⚪ Bassa</option>
                     </select>
                 </div>
+                <div>
+                    <label>Dipartimento:</label><br>
+                    <select id="modalDepartment" class="status-select" onchange="updateProjectField('department', this.value)">
+                        <option value="HR">HR</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Rent">Rent</option>
+                        <option value="Sales administrative assistants">Sales administrative assistants</option>
+                        <option value="Area manager">Area manager</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Recruiting">Recruiting</option>
+                        <option value="On boarding">On boarding</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
             </div>
-            <div style="max-height: 50vh; overflow-y: auto;">
+            
+            <div style="max-height: 45vh; overflow-y: auto;">
                 <table class="subtask-table">
                     <thead><tr><th width="35%">Sotto-Task</th><th width="15%">Status</th><th width="45%">Commento / Note</th><th width="5%"></th></tr></thead>
                     <tbody id="subtaskTableBody"></tbody>
@@ -148,8 +191,7 @@
         function setSyncStatus(active, text = "🔄 Sincronizzazione...") {
             const el = document.getElementById('sync-status');
             el.innerText = text;
-            if(active) { el.classList.add('sync-active'); } 
-            else { el.classList.remove('sync-active'); }
+            if(active) el.classList.add('sync-active'); else el.classList.remove('sync-active');
         }
 
         async function loadData() {
@@ -158,25 +200,10 @@
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await response.json();
                 
-                if (data && data.length > 0) {
-                    // Se ci sono dati su Google Sheets, usa quelli!
-                    projectsData = data;
-                } else {
-                    // SE GOOGLE SHEETS E' VUOTO: Cerca vecchi dati nel PC
-                    const pcData = localStorage.getItem('ev_pipeline_data');
-                    if (pcData) {
-                        projectsData = JSON.parse(pcData);
-                        console.log("Dati recuperati dalla memoria locale!");
-                    } else {
-                        // Se proprio non c'è nulla da nessuna parte, lascia vuoto
-                        projectsData = [];
-                    }
-                    saveData(); // Li spara subito su Google Sheets!
-                }
-            } catch (error) {
-                console.error("Errore:", error);
-                alert("Errore di connessione al database.");
-            }
+                // Assicurati che ogni progetto abbia un dipartimento, altrimenti metti "Other"
+                data.forEach(p => { if(!p.department) p.department = "Other"; });
+                projectsData = data;
+            } catch (error) { console.error("Errore:", error); alert("Errore connessione DB."); }
             renderBoard();
             setSyncStatus(false);
         }
@@ -184,9 +211,8 @@
         async function saveData() {
             renderBoard(); 
             setSyncStatus(true, "⬆️ Salvataggio...");
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(projectsData) });
-            } catch (error) { console.error("Errore:", error); }
+            try { await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(projectsData) }); } 
+            catch (error) { console.error("Errore:", error); }
             setSyncStatus(false);
         }
 
@@ -196,9 +222,18 @@
             const lists = { backlog: document.getElementById('list-backlog'), inprogress: document.getElementById('list-inprogress'), completed: document.getElementById('list-completed') };
             Object.values(lists).forEach(list => list.innerHTML = '');
             const counts = { backlog: 0, inprogress: 0, completed: 0 };
+            
+            // Lettura dei filtri attivi
+            const filterPrio = document.getElementById('filter-priority').value;
+            const filterDept = document.getElementById('filter-department').value;
 
             ['backlog', 'inprogress', 'completed'].forEach(status => {
                 let columnTasks = projectsData.filter(p => p.status === status);
+                
+                // APPLICAZIONE DEI FILTRI
+                if (filterPrio !== 'All') columnTasks = columnTasks.filter(p => p.priority === filterPrio);
+                if (filterDept !== 'All') columnTasks = columnTasks.filter(p => p.department === filterDept);
+
                 columnTasks.sort((a, b) => priorityScore[a.priority] - priorityScore[b.priority]);
                 counts[status] = columnTasks.length;
 
@@ -208,8 +243,16 @@
                     card.setAttribute('draggable', 'true');
                     card.ondragstart = (e) => dragStart(e, project.id);
                     card.ondblclick = () => openModal(project.id);
+                    
                     const priorityClass = 'priority-' + project.priority.toLowerCase();
-                    card.innerHTML = `<div class="priority-badge ${priorityClass}">Priorità ${project.priority}</div><h3>${project.name}</h3><p>${project.subtasks.length} sub-tasks</p>`;
+                    const deptDisplay = project.department || "Other";
+
+                    card.innerHTML = `
+                        <div class="priority-badge ${priorityClass}">Priorità ${project.priority}</div>
+                        <div class="dept-badge">${deptDisplay}</div>
+                        <h3>${project.name}</h3>
+                        <p>${project.subtasks.length} sub-tasks</p>
+                    `;
                     lists[status].appendChild(card);
                 });
             });
@@ -217,7 +260,9 @@
             document.getElementById('count-backlog').innerText = counts.backlog;
             document.getElementById('count-inprogress').innerText = counts.inprogress;
             document.getElementById('count-completed').innerText = counts.completed;
-            document.getElementById('stat-total').innerText = projectsData.length;
+            
+            // Le statistiche mostrano i totali dei task VISIBILI (filtrati)
+            document.getElementById('stat-total').innerText = counts.backlog + counts.inprogress + counts.completed;
             document.getElementById('stat-inprogress').innerText = counts.inprogress;
             document.getElementById('stat-completed').innerText = counts.completed;
         }
@@ -231,27 +276,50 @@
             if (project && project.status !== newStatus) { project.status = newStatus; saveData(); }
         }
 
+        // NUOVA LOGICA CREAZIONE PROGETTO: Apre subito la modale!
         function addNewMacroTask() {
-            const name = prompt("Inserisci il nome del nuovo Progetto:");
-            if (!name) return;
-            let prioInput = prompt("Priorità (numero): \n1 = Alta \n2 = Media \n3 = Bassa", "2");
-            let pLabel = prioInput === "1" ? "Alta" : (prioInput === "3" ? "Bassa" : "Media");
-            projectsData.push({ id: Date.now(), name: name, status: "backlog", priority: pLabel, subtasks: [] });
+            const newId = Date.now();
+            const newProject = { 
+                id: newId, 
+                name: "Nuovo Progetto (Clicca per rinominare)", 
+                status: "backlog", 
+                priority: "Media", 
+                department: "Other", 
+                subtasks: [] 
+            };
+            projectsData.push(newProject);
             saveData(); 
+            openModal(newId); // Apre subito per farti scrivere comodamente
         }
 
         function openModal(projectId) {
             currentEditingProjectId = projectId;
             const project = projectsData.find(p => p.id === projectId);
-            document.getElementById('modalTitle').innerText = project.name;
+            
+            document.getElementById('modalTitleInput').value = project.name;
             document.getElementById('modalPriority').value = project.priority;
+            document.getElementById('modalDepartment').value = project.department || "Other";
+            
             renderSubTasksTable(project);
+            
             document.getElementById('addSubTaskBtn').onclick = () => { project.subtasks.push({ title: "Nuovo Task...", status: "Da Iniziare", comment: "" }); saveData(); renderSubTasksTable(project); };
             document.getElementById('deleteMacroBtn').onclick = () => { if(confirm("Eliminare intero Progetto?")) { projectsData = projectsData.filter(p => p.id !== projectId); saveData(); closeModal(); } };
             document.getElementById('taskModal').style.display = 'block';
         }
 
-        function updateProjectPriority(newPriority) { if (currentEditingProjectId) { const project = projectsData.find(p => p.id === currentEditingProjectId); if (project) { project.priority = newPriority; saveData(); } } }
+        function updateProjectName(newName) {
+            if (currentEditingProjectId && newName.trim() !== "") {
+                const project = projectsData.find(p => p.id === currentEditingProjectId);
+                if (project) { project.name = newName; saveData(); }
+            }
+        }
+
+        function updateProjectField(field, newValue) { 
+            if (currentEditingProjectId) { 
+                const project = projectsData.find(p => p.id === currentEditingProjectId); 
+                if (project) { project[field] = newValue; saveData(); } 
+            } 
+        }
 
         function renderSubTasksTable(project) {
             const tbody = document.getElementById('subtaskTableBody');
